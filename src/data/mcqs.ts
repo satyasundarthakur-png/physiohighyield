@@ -5,6 +5,14 @@ export interface McqItem {
   options: { id: string; text: string }[];
   correctOptionId: string;
   explanation: string;
+  /**
+   * Optional metadata, populated only when verified — left undefined
+   * otherwise rather than guessed. System/priority context is otherwise
+   * derived at render time from the question's topicId -> Topic lookup.
+   */
+  nmcCompetency?: string;
+  pyq?: boolean;
+  priority?: "must-know" | "important" | "supporting";
 }
 
 export const MCQS: McqItem[] = [

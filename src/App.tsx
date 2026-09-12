@@ -302,6 +302,7 @@ const DIAGRAMS: {
     pearl:
       "Rigor mortis happens because ATP depletion after death leaves myosin permanently bound to actin — ATP is needed to release the cross-bridge, not just to power it.",
     Component: SlidingFilamentDiagram,
+    highYield: true,
   },
   {
     topicId: "cns",
@@ -310,6 +311,7 @@ const DIAGRAMS: {
     pearl:
       "Because it's monosynaptic, the stretch reflex is one of the fastest reflex pathways in the body — clinically tested as deep tendon reflexes (DTRs).",
     Component: ReflexArcDiagram,
+    highYield: true,
   },
   {
     topicId: "cvs",
@@ -336,6 +338,7 @@ const DIAGRAMS: {
     pearl:
       "Standing up suddenly triggers this reflex to prevent orthostatic hypotension — a blunted baroreflex (common with aging or autonomic disease) causes dizziness on standing.",
     Component: BaroreceptorReflexDiagram,
+    highYield: true,
   },
   {
     topicId: "cvs",
@@ -401,6 +404,7 @@ const DIAGRAMS: {
     pearl:
       "PT/INR tests the extrinsic + common pathway (monitors warfarin); aPTT tests the intrinsic + common pathway (monitors heparin) — a classic exam distinction.",
     Component: CoagulationCascadeDiagram,
+    highYield: true,
   },
   {
     topicId: "general",
@@ -428,6 +432,7 @@ const DIAGRAMS: {
     pearl:
       "A high TSH with low T4 points to primary (thyroid) failure, while a low TSH with low T4 points to secondary (pituitary) failure — always read TSH and T4 together, never TSH alone.",
     Component: HptAxisDiagram,
+    highYield: true,
   },
   {
     topicId: "gi",

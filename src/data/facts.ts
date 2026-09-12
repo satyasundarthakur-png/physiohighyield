@@ -19,13 +19,23 @@ export interface FactItem {
   answer: string;
   /** Only set for a subset of facts we're confident about — not every fact is classified. */
   priority?: "must-know" | "important" | "supporting";
+  /**
+   * Verified NMC-CBME competency code (e.g. "PY7.4"), set only where the
+   * fact directly matches a specific competency's text in an official/
+   * university-published curriculum document. Left undefined everywhere
+   * else rather than guessed.
+   */
+  nmcCompetency?: string;
 }
 
 // 12 modules, aligned to the NMC-CBME 2024 Physiology curriculum structure.
-// NMC module codes (PY1, PY2, ...) are shown only where a specific module
-// number is well documented (e.g. PY1 General Physiology, PY5 Cardiovascular
-// Physiology). We do not fabricate competency-level codes (e.g. "PY5.2") or
-// module numbers we can't verify — those show "NMC mapping pending" instead.
+// NMC module codes (PY1-PY11) are verified against official/university-
+// published curriculum documents reproducing the MCI/NMC 2018 Competency
+// Based UG Curriculum (Vol. 1). Note: the source curriculum combines
+// Neurophysiology and Special Senses into a single module (PY10) — our app
+// keeps them as separate topics for navigation, so both correctly share the
+// PY10 code. We do not fabricate competency-level codes (e.g. "PY5.2") —
+// see FactItem.nmcCompetency for the few individually verified exceptions.
 export const TOPICS: Topic[] = [
   {
     id: "general",
@@ -93,7 +103,7 @@ export const TOPICS: Topic[] = [
     blurb: "Glomerular filtration, tubular transport, and acid-base/fluid regulation.",
     weightage: "very-high",
     examNote: "GFR regulation, acid-base physiology, and RTA subtypes are recurring themes.",
-    nmcModule: "NMC mapping pending",
+    nmcModule: "PY7",
   },
   {
     id: "endocrine",
@@ -103,7 +113,7 @@ export const TOPICS: Topic[] = [
     weightage: "high",
     examNote:
       "Hormonal axes (thyroid, adrenal, calcium, ADH) are dependably high-priority and integrate heavily with medicine.",
-    nmcModule: "NMC mapping pending",
+    nmcModule: "PY8",
   },
   {
     id: "reproductive",
@@ -112,7 +122,7 @@ export const TOPICS: Topic[] = [
     blurb: "Gametogenesis, menstrual cycle, pregnancy, and lactation physiology.",
     weightage: "high",
     examNote: "The menstrual cycle and key hormone actions are the parts most likely to appear.",
-    nmcModule: "NMC mapping pending",
+    nmcModule: "PY9",
   },
   {
     id: "cns",
@@ -121,8 +131,8 @@ export const TOPICS: Topic[] = [
     blurb: "Reflexes, motor pathways, cerebellum, basal ganglia, and higher functions.",
     weightage: "very-high",
     examNote:
-      "Reflex arcs, cerebellar/basal ganglia signs, and aphasias are consistently high-priority.",
-    nmcModule: "NMC mapping pending",
+      "Reflex arcs, cerebellar/basal ganglia signs, and aphasias are consistently high-priority. Shares its NMC module (PY10) with Special Senses in the official curriculum.",
+    nmcModule: "PY10",
   },
   {
     id: "special-senses",
@@ -130,8 +140,9 @@ export const TOPICS: Topic[] = [
     name: "Special Senses",
     blurb: "Vision, hearing, taste, and smell — receptor physiology and pathways.",
     weightage: "moderate",
-    examNote: "A smaller, steadier share of questions — worth a solid pass, not deep priority.",
-    nmcModule: "NMC mapping pending",
+    examNote:
+      "A smaller, steadier share of questions — worth a solid pass, not deep priority. Shares its NMC module (PY10) with Neurophysiology in the official curriculum.",
+    nmcModule: "PY10",
   },
   {
     id: "integrated",
@@ -162,6 +173,7 @@ export const FACTS: FactItem[] = [
     fact: "The Na+/K+-ATPase pumps 3 Na+ out and 2 K+ in per ATP hydrolyzed, making it electrogenic and maintaining the ionic gradients that nerve and muscle excitability depend on.",
     question: "How many Na+ and K+ ions does the Na+/K+-ATPase move per cycle?",
     answer: "3 Na+ out, 2 K+ in, per ATP hydrolyzed.",
+    priority: "important",
   },
   {
     id: "gen-3",
@@ -184,6 +196,7 @@ export const FACTS: FactItem[] = [
     question: "Which feedback mechanism is more common in maintaining homeostasis?",
     answer:
       "Negative feedback — it opposes a change to restore a set point, unlike positive feedback which amplifies a change.",
+    priority: "important",
   },
   {
     id: "gen-6",
@@ -199,6 +212,7 @@ export const FACTS: FactItem[] = [
     fact: "Body fluid compartments: total body water is ~60% of body weight, two-thirds intracellular (ICF) and one-third extracellular (ECF); ECF is further split into plasma (~25% of ECF) and interstitial fluid (~75% of ECF).",
     question: "What fraction of extracellular fluid is plasma versus interstitial fluid?",
     answer: "Roughly 25% plasma, 75% interstitial fluid.",
+    priority: "must-know",
   },
 
   // ---- Blood ----
@@ -208,6 +222,7 @@ export const FACTS: FactItem[] = [
     fact: "Erythropoietin, produced mainly by the kidney in response to hypoxia, stimulates RBC production in bone marrow — the basis of anemia seen in chronic kidney disease.",
     question: "Where is erythropoietin mainly produced?",
     answer: "The kidney (peritubular fibroblast-like cells), in response to hypoxia.",
+    priority: "must-know",
   },
   {
     id: "blood-2",
@@ -216,6 +231,7 @@ export const FACTS: FactItem[] = [
     question: "Why is type O blood called the universal donor?",
     answer:
       "Because O RBCs lack both A and B surface antigens, so they don't trigger an ABO-mismatch reaction in any recipient.",
+    priority: "must-know",
   },
   {
     id: "blood-3",
@@ -224,6 +240,7 @@ export const FACTS: FactItem[] = [
     question: "What is the difference between primary and secondary hemostasis?",
     answer:
       "Primary hemostasis is platelet plug formation; secondary hemostasis is the coagulation cascade producing a stable fibrin clot.",
+    priority: "important",
   },
   {
     id: "blood-4",
@@ -238,6 +255,7 @@ export const FACTS: FactItem[] = [
     fact: "Neutrophils are the most abundant WBC and the first responders in acute bacterial infection; lymphocytes predominate in chronic/viral infection.",
     question: "Which white blood cell is the first responder in acute bacterial infection?",
     answer: "Neutrophils.",
+    priority: "important",
   },
   {
     id: "blood-6",
@@ -246,6 +264,7 @@ export const FACTS: FactItem[] = [
     question: "What imbalance in Starling forces causes edema from hypoalbuminemia?",
     answer:
       "Reduced plasma oncotic pressure fails to oppose capillary hydrostatic pressure, so fluid shifts into the interstitium.",
+    priority: "important",
   },
   {
     id: "blood-7",
@@ -255,6 +274,7 @@ export const FACTS: FactItem[] = [
       "What prevents Rh sensitization in an Rh-negative mother carrying an Rh-positive fetus?",
     answer:
       "Anti-D immunoglobulin (RhoGAM), given to prevent the mother's immune system from forming anti-Rh antibodies.",
+    priority: "must-know",
   },
 
   // ---- Nerve & Muscle ----
@@ -273,6 +293,7 @@ export const FACTS: FactItem[] = [
     question: "What causes the absolute refractory period?",
     answer:
       "Inactivation of voltage-gated Na+ channels, which cannot reopen until the membrane repolarizes.",
+    priority: "must-know",
   },
   {
     id: "nm-3",
@@ -280,6 +301,7 @@ export const FACTS: FactItem[] = [
     fact: "At the neuromuscular junction, acetylcholine released from the motor neuron binds nicotinic receptors on the muscle end plate, triggering an end-plate potential that, if threshold is reached, fires a muscle action potential.",
     question: "What neurotransmitter is released at the neuromuscular junction?",
     answer: "Acetylcholine, acting on nicotinic receptors.",
+    priority: "must-know",
   },
   {
     id: "nm-4",
@@ -288,6 +310,7 @@ export const FACTS: FactItem[] = [
     question: "What role does calcium play in initiating muscle contraction?",
     answer:
       "Ca2+ binds troponin C, causing a conformational shift in tropomyosin that exposes the myosin-binding site on actin.",
+    priority: "must-know",
   },
   {
     id: "nm-5",
@@ -295,6 +318,7 @@ export const FACTS: FactItem[] = [
     fact: "Myasthenia gravis results from autoantibodies against nicotinic acetylcholine receptors at the neuromuscular junction, causing fatigable muscle weakness that worsens with repeated use.",
     question: "What is the underlying autoimmune target in myasthenia gravis?",
     answer: "Nicotinic acetylcholine receptors at the neuromuscular junction.",
+    priority: "must-know",
   },
   {
     id: "nm-6",
@@ -303,6 +327,7 @@ export const FACTS: FactItem[] = [
     question: "Which type of nerve fiber conducts impulses fastest?",
     answer:
       "Large-diameter, heavily myelinated fibers (A-alpha) — myelination allows fast saltatory conduction.",
+    priority: "important",
   },
   {
     id: "nm-7",
@@ -311,6 +336,7 @@ export const FACTS: FactItem[] = [
     question: "Why does rigor mortis occur after death?",
     answer:
       "ATP depletion prevents myosin from detaching from actin, since ATP binding (not just hydrolysis) is required for cross-bridge release.",
+    priority: "important",
   },
   {
     id: "nm-8",
@@ -319,6 +345,7 @@ export const FACTS: FactItem[] = [
     question: "Which muscle fiber type is more fatigue-resistant, and why?",
     answer:
       "Type I (slow oxidative) fibers — they rely on oxidative metabolism, which sustains ATP supply longer than the anaerobic glycolysis used by type II fibers.",
+    priority: "important",
   },
   {
     id: "nm-9",
@@ -347,6 +374,7 @@ export const FACTS: FactItem[] = [
     question:
       "Is cerebellar damage typically ipsilateral or contralateral to the resulting deficits?",
     answer: "Ipsilateral — unlike most cortical motor lesions, which cause contralateral deficits.",
+    priority: "must-know",
   },
   {
     id: "cns-3",
@@ -355,6 +383,7 @@ export const FACTS: FactItem[] = [
     question: "Loss of which neurotransmitter/pathway causes Parkinson disease?",
     answer:
       "Dopaminergic neurons of the substantia nigra pars compacta, part of the basal ganglia circuit.",
+    priority: "must-know",
   },
   {
     id: "cns-4",
@@ -362,6 +391,7 @@ export const FACTS: FactItem[] = [
     fact: "The blood-brain barrier, formed by tight junctions between brain capillary endothelial cells, restricts passage of large/polar molecules and many drugs, protecting the CNS but complicating drug delivery.",
     question: "What structural feature of brain capillaries forms the blood-brain barrier?",
     answer: "Tight junctions between the capillary endothelial cells.",
+    priority: "important",
   },
   {
     id: "cns-5",
@@ -369,6 +399,7 @@ export const FACTS: FactItem[] = [
     fact: "REM sleep is characterized by rapid eye movements, vivid dreaming, and skeletal muscle atonia (to prevent acting out dreams); non-REM sleep (stages N1-N3) includes slow-wave sleep important for physical restoration.",
     question: "What prevents the body from physically acting out dreams during REM sleep?",
     answer: "Skeletal muscle atonia (near-total paralysis) during REM sleep.",
+    priority: "important",
   },
   {
     id: "cns-6",
@@ -376,6 +407,7 @@ export const FACTS: FactItem[] = [
     fact: "The Babinski sign (great toe dorsiflexion with fanning of other toes on plantar stimulation) is normal in infants (immature corticospinal tract) but indicates an upper motor neuron lesion in adults.",
     question: "What does a positive Babinski sign indicate in an adult?",
     answer: "An upper motor neuron lesion (corticospinal tract damage).",
+    priority: "must-know",
   },
   {
     id: "cns-7",
@@ -385,6 +417,7 @@ export const FACTS: FactItem[] = [
       "Why is the flexor withdrawal reflex classified as polysynaptic rather than monosynaptic?",
     answer:
       "It involves interneurons relaying the signal to multiple motor neurons (flexors of the stimulated limb and extensors of the opposite limb), unlike a direct single-synapse reflex.",
+    priority: "important",
   },
   {
     id: "cns-8",
@@ -393,6 +426,7 @@ export const FACTS: FactItem[] = [
     question: "What distinguishes Broca's aphasia from Wernicke's aphasia?",
     answer:
       "Broca's aphasia is non-fluent speech with preserved comprehension; Wernicke's aphasia is fluent but meaningless speech with impaired comprehension.",
+    priority: "must-know",
   },
 
   // ---- Special Senses ----
@@ -402,6 +436,7 @@ export const FACTS: FactItem[] = [
     fact: "Rods are responsible for scotopic (dim-light) vision and are more numerous than cones, which mediate photopic (bright-light) and color vision, concentrated in the fovea.",
     question: "Which photoreceptor is responsible for color vision?",
     answer: "Cones, concentrated in the fovea.",
+    priority: "important",
   },
   {
     id: "ss-2",
@@ -410,6 +445,7 @@ export const FACTS: FactItem[] = [
     question: "Does light hyperpolarize or depolarize a photoreceptor cell?",
     answer:
       "Hyperpolarizes it — light closes cGMP-gated Na+ channels, reducing the 'dark current.'",
+    priority: "important",
   },
   {
     id: "ss-3",
@@ -417,6 +453,7 @@ export const FACTS: FactItem[] = [
     fact: "Sound is transduced in the cochlea by hair cells on the basilar membrane; high frequencies are detected near the base (stiff, narrow) and low frequencies near the apex (flexible, wide) — tonotopic organization.",
     question: "Where in the cochlea are high-frequency sounds detected?",
     answer: "Near the base of the cochlea, where the basilar membrane is stiff and narrow.",
+    priority: "important",
   },
   {
     id: "ss-4",
@@ -432,6 +469,7 @@ export const FACTS: FactItem[] = [
     question: "What causes presbyopia?",
     answer:
       "Age-related loss of lens elasticity, reducing the eye's ability to accommodate for near vision.",
+    priority: "important",
   },
   {
     id: "ss-6",
@@ -457,6 +495,7 @@ export const FACTS: FactItem[] = [
     question: "Why is the SA node the normal pacemaker of the heart?",
     answer:
       "It has the fastest intrinsic rate of spontaneous depolarization among cardiac conduction tissues.",
+    priority: "must-know",
   },
   {
     id: "cvs-3",
@@ -481,6 +520,7 @@ export const FACTS: FactItem[] = [
     fact: "Baroreceptors in the carotid sinus and aortic arch sense blood pressure changes and, via the vasomotor center, trigger reflex changes in heart rate and vascular tone to buffer acute BP swings.",
     question: "Where are the main arterial baroreceptors located?",
     answer: "The carotid sinus and the aortic arch.",
+    priority: "must-know",
   },
   {
     id: "cvs-6",
@@ -488,6 +528,7 @@ export const FACTS: FactItem[] = [
     fact: "Mean arterial pressure (MAP) ≈ diastolic pressure + 1/3 (systolic - diastolic pressure); it represents the average pressure driving tissue perfusion across the cardiac cycle.",
     question: "What is the approximate formula for mean arterial pressure?",
     answer: "MAP ≈ diastolic pressure + 1/3(systolic − diastolic pressure).",
+    priority: "must-know",
   },
   {
     id: "cvs-7",
@@ -495,6 +536,7 @@ export const FACTS: FactItem[] = [
     fact: "The QRS complex on an ECG represents ventricular depolarization; the T wave represents ventricular repolarization. The P wave represents atrial depolarization.",
     question: "What does the QRS complex on an ECG represent?",
     answer: "Ventricular depolarization.",
+    priority: "must-know",
   },
   {
     id: "cvs-8",
@@ -503,6 +545,7 @@ export const FACTS: FactItem[] = [
     question: "Why does S2 splitting widen during inspiration?",
     answer:
       "Increased venous return to the right heart during inspiration delays pulmonary valve closure relative to aortic valve closure.",
+    priority: "important",
   },
   {
     id: "cvs-9",
@@ -518,6 +561,7 @@ export const FACTS: FactItem[] = [
     question: "Why does most left coronary blood flow occur during diastole rather than systole?",
     answer:
       "Because ventricular systole compresses the intramural coronary vessels, impeding flow — so most left coronary perfusion happens during diastolic relaxation.",
+    priority: "must-know",
   },
   {
     id: "cvs-11",
@@ -525,6 +569,7 @@ export const FACTS: FactItem[] = [
     fact: "Local blood flow autoregulation (myogenic and metabolic mechanisms) keeps organ perfusion relatively constant despite changes in arterial pressure — especially well-developed in the brain, heart, and kidney.",
     question: "Which three organs have especially well-developed blood flow autoregulation?",
     answer: "The brain, heart, and kidney.",
+    priority: "important",
   },
 
   // ---- Respiratory System ----
@@ -552,6 +597,7 @@ export const FACTS: FactItem[] = [
     fact: "Most CO2 is transported in blood as bicarbonate (formed via carbonic anhydrase in RBCs), with smaller amounts dissolved in plasma or bound to hemoglobin as carbaminohemoglobin.",
     question: "In what form is most CO2 transported in the blood?",
     answer: "As bicarbonate (HCO3-), formed inside RBCs via carbonic anhydrase.",
+    priority: "must-know",
   },
   {
     id: "resp-4",
@@ -559,6 +605,7 @@ export const FACTS: FactItem[] = [
     fact: "The dorsal respiratory group in the medulla sets the basic rhythm of breathing; the pontine respiratory (pneumotaxic) center fine-tunes rate and depth, particularly limiting inspiration duration.",
     question: "Which brainstem region sets the basic automatic rhythm of breathing?",
     answer: "The dorsal respiratory group in the medulla.",
+    priority: "important",
   },
   {
     id: "resp-5",
@@ -566,6 +613,7 @@ export const FACTS: FactItem[] = [
     fact: "Central chemoreceptors in the medulla respond primarily to CSF pH (reflecting CO2 levels, since CO2 crosses the blood-brain barrier and is hydrated to carbonic acid), making CO2 the dominant driver of minute ventilation under normal conditions.",
     question: "What is the dominant stimulus for central chemoreceptors regulating breathing?",
     answer: "CO2 (via its effect on CSF pH), not O2, under normal conditions.",
+    priority: "must-know",
   },
   {
     id: "resp-6",
@@ -574,6 +622,7 @@ export const FACTS: FactItem[] = [
     question: "What is the physiological role of pulmonary surfactant?",
     answer:
       "It reduces alveolar surface tension, preventing alveolar collapse, especially in smaller alveoli (Laplace's law).",
+    priority: "must-know",
   },
   {
     id: "resp-7",
@@ -581,6 +630,7 @@ export const FACTS: FactItem[] = [
     fact: "Due to gravity, the lung apex has a relatively higher ventilation-perfusion (V/Q) ratio (dead-space-like, over-ventilated relative to perfusion), while the base has a lower V/Q ratio (shunt-like, over-perfused relative to ventilation).",
     question: "Which region of the upright lung has the highest V/Q ratio?",
     answer: "The apex — it is relatively over-ventilated compared to its perfusion.",
+    priority: "must-know",
   },
   {
     id: "resp-8",
@@ -598,6 +648,7 @@ export const FACTS: FactItem[] = [
     question: "What triggers the Hering-Breuer reflex and what does it prevent?",
     answer:
       "Lung stretch receptor activation during inspiration, signaling via the vagus nerve to inhibit further inspiration and prevent lung overinflation.",
+    priority: "important",
   },
   {
     id: "resp-10",
@@ -606,6 +657,7 @@ export const FACTS: FactItem[] = [
     question: "What is the Haldane effect?",
     answer:
       "Deoxyhemoglobin binds CO2/H+ more readily than oxyhemoglobin, so deoxygenation favors CO2 loading in tissues and oxygenation favors CO2 unloading in the lungs.",
+    priority: "must-know",
   },
 
   // ---- Renal Physiology ----
@@ -617,6 +669,7 @@ export const FACTS: FactItem[] = [
     answer:
       "Because it is freely filtered at the glomerulus and undergoes minimal tubular reabsorption or secretion, closely reflecting filtration alone.",
     priority: "must-know",
+    nmcCompetency: "PY7.3",
   },
   {
     id: "renal-2",
@@ -625,6 +678,7 @@ export const FACTS: FactItem[] = [
     question: "What causes glucosuria once blood glucose exceeds the renal threshold?",
     answer:
       "The SGLT2 transporters in the proximal tubule become saturated and can no longer reabsorb all filtered glucose.",
+    priority: "must-know",
   },
   {
     id: "renal-3",
@@ -633,6 +687,8 @@ export const FACTS: FactItem[] = [
     question:
       "Which nephron segment establishes the medullary osmotic gradient used to concentrate urine?",
     answer: "The loop of Henle (via its countercurrent multiplier mechanism).",
+    priority: "must-know",
+    nmcCompetency: "PY7.4",
   },
   {
     id: "renal-4",
@@ -640,6 +696,8 @@ export const FACTS: FactItem[] = [
     fact: "Aldosterone acts on the distal tubule/collecting duct to increase Na+ reabsorption (and water follows) and K+/H+ secretion, in response to angiotensin II or elevated plasma K+.",
     question: "What are the two main effects of aldosterone on the distal nephron?",
     answer: "Increased Na+ (and water) reabsorption, and increased K+/H+ secretion.",
+    priority: "must-know",
+    nmcCompetency: "PY7.5",
   },
   {
     id: "renal-5",
@@ -647,6 +705,8 @@ export const FACTS: FactItem[] = [
     fact: "The kidney compensates for a primary respiratory acid-base disorder by adjusting bicarbonate reabsorption/generation, but this renal compensation takes days, unlike the rapid (minutes) respiratory compensation for a metabolic disorder.",
     question: "Which compensation mechanism is slower — renal or respiratory?",
     answer: "Renal compensation, which takes days rather than minutes.",
+    priority: "important",
+    nmcCompetency: "PY7.5",
   },
   {
     id: "renal-6",
@@ -656,6 +716,7 @@ export const FACTS: FactItem[] = [
     answer:
       "Low renal perfusion pressure, low NaCl delivery to the macula densa, and increased sympathetic activity.",
     priority: "must-know",
+    nmcCompetency: "PY7.2",
   },
   {
     id: "renal-7",
@@ -665,6 +726,7 @@ export const FACTS: FactItem[] = [
       "Why can ACE inhibitors precipitate acute kidney injury in bilateral renal artery stenosis?",
     answer:
       "They remove angiotensin II's preferential efferent arteriolar constriction, which was maintaining GFR despite reduced renal blood flow — GFR then falls sharply.",
+    priority: "important",
   },
   {
     id: "renal-8",
@@ -697,6 +759,7 @@ export const FACTS: FactItem[] = [
     fact: "Gastrin, secreted by G cells in the stomach antrum, stimulates gastric acid secretion by parietal cells; its release is inhibited by low gastric pH (negative feedback).",
     question: "What inhibits gastrin release from G cells?",
     answer: "A low (acidic) gastric pH — a negative feedback loop.",
+    priority: "must-know",
   },
   {
     id: "gi-2",
@@ -705,6 +768,7 @@ export const FACTS: FactItem[] = [
     question: "What triggers secretin release, and what is its main action?",
     answer:
       "Acidic chyme entering the duodenum triggers secretin, which stimulates pancreatic bicarbonate secretion.",
+    priority: "must-know",
   },
   {
     id: "gi-3",
@@ -712,6 +776,7 @@ export const FACTS: FactItem[] = [
     fact: "Cholecystokinin (CCK), released by I cells in response to fat and protein in the duodenum, stimulates gallbladder contraction and pancreatic enzyme secretion, and slows gastric emptying.",
     question: "What stimulates cholecystokinin (CCK) release?",
     answer: "Fat and protein content in the duodenum.",
+    priority: "must-know",
   },
   {
     id: "gi-4",
@@ -726,6 +791,7 @@ export const FACTS: FactItem[] = [
     fact: "Intrinsic factor, secreted by gastric parietal cells, is required for vitamin B12 absorption in the terminal ileum; loss of parietal cells (as in pernicious anemia) causes B12 deficiency.",
     question: "Which gastric cell secretes intrinsic factor?",
     answer: "Parietal cells.",
+    priority: "must-know",
   },
   {
     id: "gi-6",
@@ -741,6 +807,7 @@ export const FACTS: FactItem[] = [
     question: "Where are bile salts reabsorbed in enterohepatic circulation?",
     answer:
       "The terminal ileum, via active transport, then returned to the liver via the portal vein.",
+    priority: "important",
   },
   {
     id: "gi-8",
@@ -748,6 +815,7 @@ export const FACTS: FactItem[] = [
     fact: "Pancreatic proteolytic enzymes are secreted as inactive zymogens (trypsinogen, chymotrypsinogen); trypsinogen is activated to trypsin by enterokinase on the duodenal brush border, which then activates the remaining zymogens — protecting the pancreas from autodigestion.",
     question: "What enzyme activates trypsinogen to trypsin in the duodenum?",
     answer: "Enterokinase (enteropeptidase), on the duodenal brush border.",
+    priority: "must-know",
   },
 
   // ---- Endocrine Physiology ----
@@ -773,6 +841,7 @@ export const FACTS: FactItem[] = [
     fact: "Cortisol, released from the adrenal cortex under ACTH stimulation, raises blood glucose (via gluconeogenesis), has anti-inflammatory/immunosuppressive effects, and follows a diurnal rhythm peaking in the early morning.",
     question: "What is the diurnal pattern of cortisol secretion?",
     answer: "Highest in the early morning, lowest around midnight.",
+    priority: "must-know",
   },
   {
     id: "endo-4",
@@ -781,6 +850,7 @@ export const FACTS: FactItem[] = [
     question: "Why is thyroid hormone particularly critical during fetal development?",
     answer:
       "It is essential for normal neural development — deficiency during this period causes irreversible intellectual disability (cretinism).",
+    priority: "must-know",
   },
   {
     id: "endo-5",
@@ -789,6 +859,7 @@ export const FACTS: FactItem[] = [
     question: "Name the three mechanisms by which PTH raises serum calcium.",
     answer:
       "Increased bone resorption, increased renal Ca2+ reabsorption, and increased renal activation of vitamin D (boosting intestinal absorption).",
+    priority: "must-know",
   },
   {
     id: "endo-6",
@@ -804,6 +875,7 @@ export const FACTS: FactItem[] = [
     fact: "Serum calcium is jointly regulated by PTH (raises calcium), calcitonin (lowers calcium, from thyroid C cells), and activated vitamin D; vitamin D requires sequential hydroxylation in the liver (25-OH) and kidney (1,25-(OH)2, the active form, via 1-alpha-hydroxylase).",
     question: "In which organ does the final activating hydroxylation step of vitamin D occur?",
     answer: "The kidney (1-alpha-hydroxylation to form active 1,25-dihydroxyvitamin D).",
+    priority: "important",
   },
   {
     id: "endo-8",
@@ -813,6 +885,7 @@ export const FACTS: FactItem[] = [
       "Which renal receptor and channel mediate ADH's water-reabsorbing action in the collecting duct?",
     answer:
       "V2 receptors, which trigger insertion of aquaporin-2 water channels into the collecting duct membrane.",
+    priority: "must-know",
   },
   {
     id: "endo-9",
@@ -831,6 +904,7 @@ export const FACTS: FactItem[] = [
       "How can central and nephrogenic diabetes insipidus be distinguished using desmopressin?",
     answer:
       "Central DI responds to desmopressin with decreased urine output (concentrated urine), while nephrogenic DI does not respond, since the kidney itself is resistant to ADH.",
+    priority: "must-know",
   },
 
   // ---- Reproductive Physiology ----
@@ -841,6 +915,8 @@ export const FACTS: FactItem[] = [
     question: "What triggers the LH surge that causes ovulation?",
     answer:
       "A sustained high level of estrogen from the dominant follicle, acting via positive feedback on the hypothalamus/pituitary.",
+    priority: "must-know",
+    nmcCompetency: "PY9.4",
   },
   {
     id: "repro-2",
@@ -855,6 +931,7 @@ export const FACTS: FactItem[] = [
     fact: "Human chorionic gonadotropin (hCG), secreted by the syncytiotrophoblast after implantation, maintains the corpus luteum (and thus progesterone) until the placenta takes over steroidogenesis around 8-10 weeks.",
     question: "What hormone maintains the corpus luteum in early pregnancy?",
     answer: "Human chorionic gonadotropin (hCG).",
+    priority: "must-know",
   },
   {
     id: "repro-4",
@@ -862,6 +939,8 @@ export const FACTS: FactItem[] = [
     fact: "Spermatogenesis occurs in the seminiferous tubules under FSH (acting on Sertoli cells) and LH (acting on Leydig cells to produce testosterone) stimulation, taking approximately 64-74 days to complete.",
     question: "Which pituitary hormone acts on Leydig cells to stimulate testosterone production?",
     answer: "LH (luteinizing hormone).",
+    priority: "important",
+    nmcCompetency: "PY9.3",
   },
   {
     id: "repro-5",
@@ -871,6 +950,8 @@ export const FACTS: FactItem[] = [
       "Why is the oxytocin-driven uterine contraction of labor considered a positive feedback loop?",
     answer:
       "Cervical stretching from contractions stimulates more oxytocin release, which causes stronger contractions, progressively amplifying rather than dampening the response.",
+    priority: "must-know",
+    nmcCompetency: "PY9.8",
   },
   {
     id: "repro-6",
@@ -878,6 +959,8 @@ export const FACTS: FactItem[] = [
     fact: "Prolactin stimulates milk production and, at high levels during lactation, suppresses GnRH release, contributing to lactational amenorrhea (a natural, though not fully reliable, contraceptive effect).",
     question: "How does prolactin contribute to lactational amenorrhea?",
     answer: "High prolactin suppresses GnRH release, which reduces LH/FSH and therefore ovulation.",
+    priority: "supporting",
+    nmcCompetency: "PY9.8",
   },
 
   // ---- Integrated Physiology ----
@@ -896,6 +979,7 @@ export const FACTS: FactItem[] = [
     question: "What actually changes in the hypothalamus during a fever?",
     answer:
       "The thermoregulatory set point is raised by pyrogens, so the body actively generates and conserves heat to reach the new, higher target temperature.",
+    priority: "important",
   },
   {
     id: "int-3",
@@ -920,6 +1004,7 @@ export const FACTS: FactItem[] = [
     question: "How does visceral adiposity contribute to insulin resistance?",
     answer:
       "It releases excess free fatty acids and pro-inflammatory adipokines that impair insulin signaling in muscle and liver.",
+    priority: "important",
   },
   {
     id: "int-6",
@@ -928,6 +1013,7 @@ export const FACTS: FactItem[] = [
     question: "What distinguishes brain death from a persistent vegetative state?",
     answer:
       "Brain death is irreversible loss of all brainstem function, including the drive to breathe; in a vegetative state, brainstem function (including spontaneous breathing) is preserved.",
+    priority: "must-know",
   },
   {
     id: "int-7",
@@ -935,6 +1021,8 @@ export const FACTS: FactItem[] = [
     fact: "In adult basic life support, high-quality chest compressions (rate 100-120/min, depth ~5-6 cm, allowing full chest recoil) generate forward blood flow mainly via direct cardiac compression and thoracic pump mechanisms, sustaining perfusion to the brain and heart until defibrillation/advanced care.",
     question: "What is the recommended chest compression rate in adult BLS?",
     answer: "100-120 compressions per minute, with a depth of about 5-6 cm and full chest recoil.",
+    priority: "must-know",
+    nmcCompetency: "PY11.14",
   },
   {
     id: "int-8",
