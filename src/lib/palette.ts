@@ -27,11 +27,11 @@ export const TOPIC_PALETTE: PaletteColor[] = [
 
 // Named aliases for the first 8 palette colors, used throughout the
 // hand-built SVG pathway diagrams (src/components/pathway-diagrams.tsx).
-export const violet = TOPIC_PALETTE[0]!;
-export const teal = TOPIC_PALETTE[1]!;
-export const amber = TOPIC_PALETTE[2]!;
-export const rose = TOPIC_PALETTE[3]!;
-export const emerald = TOPIC_PALETTE[4]!;
-export const blue = TOPIC_PALETTE[5]!;
-export const magenta = TOPIC_PALETTE[7]!;
-export const lime = TOPIC_PALETTE[9]!;
+export const violet = TOPIC_PALETTE[0] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
+export const teal = TOPIC_PALETTE[1] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
+export const amber = TOPIC_PALETTE[2] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
+export const rose = TOPIC_PALETTE[3] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
+export const emerald = TOPIC_PALETTE[4] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
+export const blue = TOPIC_PALETTE[5] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
+export const magenta = TOPIC_PALETTE[7] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
+export const lime = TOPIC_PALETTE[9] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };

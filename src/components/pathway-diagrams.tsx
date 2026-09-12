@@ -202,7 +202,7 @@ export function HpaAxisDiagram() {
         const [label, sub] = s.split("\n");
         return (
           <g key={s}>
-            <Step x={x} y={40} w={104} h={44} label={label!} sub={sub} color={i === 3 ? violet : amber} />
+            <Step x={x} y={40} w={104} h={44} label={label ?? ""} sub={sub} color={i === 3 ? violet : amber} />
             {i < steps.length - 1 && <Arrow x1={x + 104} y1={62} x2={x + colW - 6} y2={62} />}
           </g>
         );

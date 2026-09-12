@@ -24,7 +24,7 @@ type Tab = "sheets" | "flashcards" | "diagrams" | "values";
 
 function topicColor(topicId: string) {
   const index = TOPICS.findIndex((t) => t.id === topicId);
-  return TOPIC_PALETTE[(index < 0 ? 0 : index) % TOPIC_PALETTE.length]!;
+  return TOPIC_PALETTE[(index < 0 ? 0 : index) % TOPIC_PALETTE.length] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" };
 }
 
 function SectionIntro({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
@@ -255,7 +255,7 @@ function FactSheets() {
     <section>
       <Button variant="ghost" onClick={() => setTopicId(null)} className="mb-4 -ml-3"><ArrowLeft size={16} />All systems</Button>
       <SectionIntro eyebrow={`${facts.length} high-yield facts`} title={topic.name} description={topic.blurb} />
-      {TOPIC_PEARLS[topicId] && <ClinicalPearl text={TOPIC_PEARLS[topicId]!} color={color} />}
+      {TOPIC_PEARLS[topicId] && <ClinicalPearl text={TOPIC_PEARLS[topicId] ?? ""} color={color} />}
       <ol className="mt-4 space-y-3">
         {facts.map((fact, index) => (
           <li key={fact.id} className="flex gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
@@ -493,10 +493,10 @@ function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
     { label: "Normal values", value: `${NORMAL_VALUES.length}` },
   ];
   const features: { tab: Tab; title: string; description: string; icon: ReactNode; color: { bg: string; fg: string; ring: string } }[] = [
-    { tab: "sheets", title: "Fact Sheets", description: "Concise, system-by-system facts with clinical pearls and further reading.", icon: <BookOpen size={22} />, color: TOPIC_PALETTE[0]! },
-    { tab: "flashcards", title: "Flashcards + MCQs", description: "Spaced-repetition review and NEET PG-style MCQ practice.", icon: <Layers3 size={22} />, color: TOPIC_PALETTE[2]! },
-    { tab: "diagrams", title: "Diagrams", description: "Animated physiology diagrams you can tap to enlarge, grouped by system.", icon: <Waypoints size={22} />, color: TOPIC_PALETTE[4]! },
-    { tab: "values", title: "Normal Values", description: "Searchable reference for every normal range examiners test.", icon: <FlaskConical size={22} />, color: TOPIC_PALETTE[6]! },
+    { tab: "sheets", title: "Fact Sheets", description: "Concise, system-by-system facts with clinical pearls and further reading.", icon: <BookOpen size={22} />, color: TOPIC_PALETTE[0] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" } },
+    { tab: "flashcards", title: "Flashcards + MCQs", description: "Spaced-repetition review and NEET PG-style MCQ practice.", icon: <Layers3 size={22} />, color: TOPIC_PALETTE[2] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" } },
+    { tab: "diagrams", title: "Diagrams", description: "Animated physiology diagrams you can tap to enlarge, grouped by system.", icon: <Waypoints size={22} />, color: TOPIC_PALETTE[4] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" } },
+    { tab: "values", title: "Normal Values", description: "Searchable reference for every normal range examiners test.", icon: <FlaskConical size={22} />, color: TOPIC_PALETTE[6] ?? TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" } },
   ];
   return (
     <div className="flex min-h-screen flex-col bg-background">
