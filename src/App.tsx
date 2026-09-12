@@ -10,7 +10,7 @@ import {
   Waypoints,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FACTS, TOPICS, type FactItem } from "@/data/facts";
+import { FACTS, TOPICS, WEIGHTAGE_META, type FactItem, type Weightage } from "@/data/facts";
 import { MCQS, type McqItem } from "@/data/mcqs";
 import { NORMAL_VALUES } from "@/data/normal-values";
 import { TOPIC_PALETTE } from "@/lib/palette";
@@ -127,6 +127,19 @@ function ClinicalPearl({ text, color }: { text: string; color: { bg: string; fg:
         {text}
       </p>
     </div>
+  );
+}
+
+function WeightageBadge({ weightage }: { weightage: Weightage }) {
+  const meta = WEIGHTAGE_META[weightage];
+  return (
+    <span
+      style={{ backgroundColor: meta.color.bg, color: meta.color.fg }}
+      className="inline-flex shrink-0 items-center rounded-full px-2 py-1 text-[10px] font-bold"
+      title={meta.description}
+    >
+      {meta.label}
+    </span>
   );
 }
 
@@ -508,11 +521,15 @@ function Diagrams() {
           const diagramsInUnit = DIAGRAMS.filter((d) => unitTopicIds.has(d.topicId));
           const iconsInUnit = GALLERY_ICONS.filter((g) => unitTopicIds.has(g.topicId));
           if (diagramsInUnit.length === 0 && iconsInUnit.length === 0) return null;
+          const unitTopic = TOPICS.find((t) => t.unit === unit);
           return (
             <div key={unit}>
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                {unit}
-              </h3>
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  {unit}
+                </h3>
+                {unitTopic && <WeightageBadge weightage={unitTopic.weightage} />}
+              </div>
               {diagramsInUnit.length > 0 && (
                 <div className="grid gap-4 lg:grid-cols-2">
                   {diagramsInUnit.map((d, i) => {
@@ -611,8 +628,13 @@ function FactSheets() {
         <SectionIntro
           eyebrow={`${FACTS.length} high-yield facts`}
           title="Choose a system"
-          description="Organized by unit — the sequence most Indian MBBS physiology courses teach from."
+          description="Organized by unit — the sequence most Indian MBBS physiology courses teach from, with each system tagged by how often it tends to appear on NEET PG."
         />
+        <p className="-mt-4 mb-6 text-xs leading-relaxed text-muted-foreground">
+          Yield tags reflect commonly observed NEET PG question patterns, not an official NBE
+          breakdown — the exam doesn't publish one. Use them to prioritize revision time, not as a
+          guarantee.
+        </p>
         <div className="space-y-8">
           {units.map((unit) => (
             <div key={unit}>
@@ -644,6 +666,9 @@ function FactSheets() {
                       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                         {topic.blurb}
                       </p>
+                      <div className="mt-3">
+                        <WeightageBadge weightage={topic.weightage} />
+                      </div>
                     </button>
                   );
                 })}
@@ -670,6 +695,10 @@ function FactSheets() {
         title={topic.name}
         description={topic.blurb}
       />
+      <div className="-mt-4 mb-4 flex flex-wrap items-center gap-2">
+        <WeightageBadge weightage={topic.weightage} />
+        <p className="text-xs leading-relaxed text-muted-foreground">{topic.examNote}</p>
+      </div>
       {TOPIC_PEARLS[topicId] && <ClinicalPearl text={TOPIC_PEARLS[topicId] ?? ""} color={color} />}
       <ol className="mt-4 space-y-3">
         {facts.map((fact, index) => (
@@ -766,7 +795,8 @@ function FlashcardMode() {
             <optgroup key={unit} label={unit}>
               {TOPICS.filter((t) => t.unit === unit).map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.name} ({FACTS.filter((f) => f.topicId === t.id).length})
+                  {t.name} ({FACTS.filter((f) => f.topicId === t.id).length}) ·{" "}
+                  {WEIGHTAGE_META[t.weightage].label}
                 </option>
               ))}
             </optgroup>
@@ -886,7 +916,8 @@ function McqPractice() {
               {TOPICS.filter((t) => t.unit === unit && MCQS.some((q) => q.topicId === t.id)).map(
                 (t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name} ({MCQS.filter((q) => q.topicId === t.id).length})
+                    {t.name} ({MCQS.filter((q) => q.topicId === t.id).length}) ·{" "}
+                    {WEIGHTAGE_META[t.weightage].label}
                   </option>
                 ),
               )}
