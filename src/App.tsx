@@ -1554,7 +1554,7 @@ function Practical() {
 
 function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
   const stats = [
-    { label: "NMC-CBME Modules", value: "12" },
+    { label: "Study Modules · NMC-CBME Aligned", value: "12" },
     { label: "High-yield facts", value: `${FACTS.length}+` },
     { label: "Animated diagrams", value: `${DIAGRAMS.length}` },
     { label: "Normal values", value: `${NORMAL_VALUES.length}` },

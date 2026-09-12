@@ -7,7 +7,13 @@ export interface Topic {
   unit: string;
   weightage: Weightage;
   examNote: string;
-  /** NMC-CBME module code (e.g. "PY5"), or "NMC mapping pending" where we don't have a verified code. */
+  /**
+   * NMC-CBME module code (e.g. "PY5") verified against the published 2018
+   * MCI/NMC Competency Based UG Curriculum, or "NMC mapping pending" where
+   * we don't have a verified code. See the note above TOPICS: this app's
+   * 12 study-navigation topics are aligned with, but not a literal 1:1
+   * reproduction of, the official numbered module list.
+   */
   nmcModule: string;
 }
 
@@ -28,14 +34,26 @@ export interface FactItem {
   nmcCompetency?: string;
 }
 
-// 12 modules, aligned to the NMC-CBME 2024 Physiology curriculum structure.
-// NMC module codes (PY1-PY11) are verified against official/university-
-// published curriculum documents reproducing the MCI/NMC 2018 Competency
-// Based UG Curriculum (Vol. 1). Note: the source curriculum combines
-// Neurophysiology and Special Senses into a single module (PY10) — our app
-// keeps them as separate topics for navigation, so both correctly share the
-// PY10 code. We do not fabricate competency-level codes (e.g. "PY5.2") —
-// see FactItem.nmcCompetency for the few individually verified exceptions.
+// This app's 12 topics are study-navigation modules ALIGNED WITH the
+// NMC-CBME Physiology curriculum — they are not asserted to be a literal,
+// certified 1:1 reproduction of the official numbered module list, and
+// should not be presented to users as "the 12 official NMC modules."
+//
+// Curriculum-version note: "NMC-CBME 2024" in this app's UI refers to the
+// currently branded name of the ongoing competency-based curriculum. The
+// specific module codes below (PY1-PY11) were verified against
+// official/university-published documents reproducing the MCI/NMC 2018
+// Competency Based UG Curriculum (Vol. 1) — the source document we could
+// actually verify text against. We have not verified whether a distinct,
+// separately renumbered "2024" edition changes this module numbering; if
+// the person maintaining this app confirms a 2024-specific revision, these
+// codes should be re-checked against it rather than assumed unchanged.
+//
+// The source curriculum combines Neurophysiology and Special Senses into a
+// single module (PY10) — our app keeps them as separate topics for
+// navigation, so both correctly share the PY10 code. We do not fabricate
+// competency-level codes (e.g. "PY5.2") — see FactItem.nmcCompetency for
+// the few individually verified exceptions.
 export const TOPICS: Topic[] = [
   {
     id: "general",
