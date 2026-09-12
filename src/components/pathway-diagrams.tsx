@@ -1,14 +1,68 @@
 // Original animated diagrams for physiology study reference.
 // Hand-built for this app — not sourced or traced from any textbook.
-import { violet, teal, amber, rose, emerald } from "@/lib/palette";
+import { violet, teal, amber, rose, emerald, blue, magenta, lime } from "@/lib/palette";
 
-function Step({ x, y, w = 108, h = 40, label, sub, color }: { x: number; y: number; w?: number; h?: number; label: string; sub?: string; color: { bg: string; fg: string } }) {
+// Modern shared building blocks: soft drop-shadow + glass sheen on boxes,
+// a marching-ants "flow" animation on connector arrows, and a glowing,
+// pulsing dot for the animated signal traveling along a pathway.
+
+function Step({
+  x,
+  y,
+  w = 108,
+  h = 40,
+  label,
+  sub,
+  color,
+}: {
+  x: number;
+  y: number;
+  w?: number;
+  h?: number;
+  label: string;
+  sub?: string;
+  color: { bg: string; fg: string };
+}) {
   return (
-    <g>
-      <rect x={x} y={y} width={w} height={h} rx={10} fill={color.bg} stroke={color.fg} strokeOpacity={0.25} />
-      <text x={x + w / 2} y={y + (sub ? 18 : 25)} textAnchor="middle" fontSize="12" fontWeight={700} fill={color.fg}>{label}</text>
+    <g filter="url(#soft-shadow)">
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx={12}
+        fill={color.bg}
+        stroke={color.fg}
+        strokeOpacity={0.32}
+        strokeWidth={1.1}
+      />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={Math.max(h * 0.55, 14)}
+        rx={12}
+        fill="url(#glass-sheen)"
+      />
+      <text
+        x={x + w / 2}
+        y={y + (sub ? 18 : 25)}
+        textAnchor="middle"
+        fontSize="12"
+        fontWeight={700}
+        fill={color.fg}
+      >
+        {label}
+      </text>
       {sub && (
-        <text x={x + w / 2} y={y + 31} textAnchor="middle" fontSize="9.5" fill={color.fg} opacity={0.85}>
+        <text
+          x={x + w / 2}
+          y={y + 31}
+          textAnchor="middle"
+          fontSize="9.5"
+          fill={color.fg}
+          opacity={0.85}
+        >
           {sub}
         </text>
       )}
@@ -17,46 +71,158 @@ function Step({ x, y, w = 108, h = 40, label, sub, color }: { x: number; y: numb
 }
 
 function Arrow({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) {
-  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--color-muted-foreground)" strokeWidth={1.6} markerEnd="url(#arrowhead)" opacity={0.55} />;
+  return (
+    <g>
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.8}
+        opacity={0.22}
+      />
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.8}
+        strokeDasharray="4 5"
+        strokeLinecap="round"
+        opacity={0.75}
+        markerEnd="url(#arrowhead)"
+      >
+        <animate
+          attributeName="stroke-dashoffset"
+          from="18"
+          to="0"
+          dur="1s"
+          repeatCount="indefinite"
+        />
+      </line>
+    </g>
+  );
 }
 
 function ArrowDefs() {
   return (
     <defs>
-      <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-        <path d="M0,0 L6,3 L0,6 Z" fill="var(--color-muted-foreground)" opacity={0.7} />
+      <marker id="arrowhead" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+        <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--color-muted-foreground)" opacity={0.8} />
       </marker>
+      <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="1.5" stdDeviation="2.2" floodOpacity="0.16" />
+      </filter>
+      <filter id="dot-glow" x="-250%" y="-250%" width="600%" height="600%">
+        <feGaussianBlur stdDeviation="3.2" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+      <linearGradient id="glass-sheen" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.32" />
+        <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+      </linearGradient>
     </defs>
   );
 }
 
-export function ActionPotentialDiagram() {
-  const curve = "M 20 130 L 80 130 C 100 130, 105 20, 130 20 C 150 20, 155 90, 180 110 C 220 145, 260 132, 320 130 L 460 130";
+// Glowing, gently pulsing dot that travels a path — replaces plain solid
+// dots across every diagram for a more modern, "signal traveling" feel.
+function MotionDot({ path, dur, color }: { path: string; dur: string; color: { fg: string } }) {
   return (
-    <svg viewBox="0 0 480 190" className="w-full" role="img" aria-label="Nerve action potential diagram">
-      <ArrowDefs />
-      <line x1="20" y1="150" x2="470" y2="150" stroke="var(--color-muted-foreground)" strokeWidth={1.5} />
-      <line x1="20" y1="150" x2="20" y2="15" stroke="var(--color-muted-foreground)" strokeWidth={1.5} />
-      <text x="245" y="175" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">Time →</text>
-      <text x="10" y="80" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)" transform="rotate(-90 10 80)">Membrane potential (mV) →</text>
-      <path d={curve} fill="none" stroke={violet.fg} strokeWidth={2.5} />
-      <text x="95" y="65" fontSize="9" fontWeight={700} fill={teal.fg}>Depolarization</text>
-      <text x="60" y="15" fontSize="9" fontWeight={700} fill={teal.fg}>(Na⁺ channels open)</text>
-      <text x="195" y="100" fontSize="9" fontWeight={700} fill={amber.fg}>Repolarization</text>
-      <text x="185" y="185" fontSize="9" fontWeight={700} fill={amber.fg}>(K⁺ channels open, Na⁺ inactivate)</text>
-      <text x="330" y="145" fontSize="9" fontWeight={700} fill={rose.fg}>Resting potential (−70mV)</text>
-      <circle r="5" fill={violet.fg}>
-        <animateMotion dur="4s" repeatCount="indefinite" path={curve} />
+    <g filter="url(#dot-glow)">
+      <circle r="7" fill={color.fg} opacity={0.3}>
+        <animateMotion dur={dur} repeatCount="indefinite" path={path} />
+        <animate attributeName="r" values="5.5;9;5.5" dur="1.6s" repeatCount="indefinite" />
       </circle>
+      <circle r="4" fill={color.fg}>
+        <animateMotion dur={dur} repeatCount="indefinite" path={path} />
+      </circle>
+    </g>
+  );
+}
+
+export function ActionPotentialDiagram() {
+  const curve =
+    "M 20 130 L 80 130 C 100 130, 105 20, 130 20 C 150 20, 155 90, 180 110 C 220 145, 260 132, 320 130 L 460 130";
+  return (
+    <svg
+      viewBox="0 0 480 190"
+      className="w-full"
+      role="img"
+      aria-label="Nerve action potential diagram"
+    >
+      <ArrowDefs />
+      <line
+        x1="20"
+        y1="150"
+        x2="470"
+        y2="150"
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.5}
+      />
+      <line
+        x1="20"
+        y1="150"
+        x2="20"
+        y2="15"
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.5}
+      />
+      <text x="245" y="175" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">
+        Time →
+      </text>
+      <text
+        x="10"
+        y="80"
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+        transform="rotate(-90 10 80)"
+      >
+        Membrane potential (mV) →
+      </text>
+      <path d={curve} fill="none" stroke={violet.fg} strokeWidth={2.5} />
+      <text x="95" y="65" fontSize="9" fontWeight={700} fill={teal.fg}>
+        Depolarization
+      </text>
+      <text x="60" y="15" fontSize="9" fontWeight={700} fill={teal.fg}>
+        (Na⁺ channels open)
+      </text>
+      <text x="195" y="100" fontSize="9" fontWeight={700} fill={amber.fg}>
+        Repolarization
+      </text>
+      <text x="185" y="185" fontSize="9" fontWeight={700} fill={amber.fg}>
+        (K⁺ channels open, Na⁺ inactivate)
+      </text>
+      <text x="330" y="145" fontSize="9" fontWeight={700} fill={rose.fg}>
+        Resting potential (−70mV)
+      </text>
+      <MotionDot path={curve} dur="4s" color={violet} />
     </svg>
   );
 }
 
 export function SlidingFilamentDiagram() {
-  const steps = ["Ca²⁺ binds troponin C", "Tropomyosin shifts, exposes binding site", "Myosin head binds actin (cross-bridge)", "Power stroke pulls thin filament", "ATP binds → cross-bridge releases"];
+  const steps = [
+    "Ca²⁺ binds troponin C",
+    "Tropomyosin shifts, exposes binding site",
+    "Myosin head binds actin (cross-bridge)",
+    "Power stroke pulls thin filament",
+    "ATP binds → cross-bridge releases",
+  ];
   const colW = 100;
   return (
-    <svg viewBox={`0 0 ${steps.length * colW + 20} 130`} className="w-full" role="img" aria-label="Sliding filament cross-bridge cycle diagram">
+    <svg
+      viewBox={`0 0 ${steps.length * colW + 20} 130`}
+      className="w-full"
+      role="img"
+      aria-label="Sliding filament cross-bridge cycle diagram"
+    >
       <ArrowDefs />
       {steps.map((s, i) => {
         const x = 10 + i * colW;
@@ -67,42 +233,89 @@ export function SlidingFilamentDiagram() {
           </g>
         );
       })}
-      <path d={`M ${steps.length * colW - 12} 90 C ${steps.length * colW - 12} 115, 50 115, 50 90`} fill="none" stroke={amber.fg} strokeOpacity={0.4} strokeWidth={1.6} markerEnd="url(#arrowhead)" />
-      <text x={(steps.length * colW + 20) / 2} y={20} textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">Cycle repeats as long as Ca²⁺ and ATP are available — rigor mortis occurs when ATP runs out</text>
-      <circle r="5" fill={amber.fg}>
-        <animateMotion dur="6s" repeatCount="indefinite" path={`M 54 65 ${steps.map((_, i) => `L ${10 + i * colW + 44} 65`).join(" ")}`} />
-      </circle>
+      <path
+        d={`M ${steps.length * colW - 12} 90 C ${steps.length * colW - 12} 115, 50 115, 50 90`}
+        fill="none"
+        stroke={amber.fg}
+        strokeOpacity={0.4}
+        strokeWidth={1.6}
+        markerEnd="url(#arrowhead)"
+      />
+      <text
+        x={(steps.length * colW + 20) / 2}
+        y={20}
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        Cycle repeats as long as Ca²⁺ and ATP are available — rigor mortis occurs when ATP runs out
+      </text>
+      <MotionDot
+        path={`M 54 65 ${steps.map((_, i) => `L ${10 + i * colW + 44} 65`).join(" ")}`}
+        dur="6s"
+        color={amber}
+      />
     </svg>
   );
 }
 
 export function ReflexArcDiagram() {
   return (
-    <svg viewBox="0 0 460 200" className="w-full" role="img" aria-label="Stretch reflex arc diagram">
+    <svg
+      viewBox="0 0 460 200"
+      className="w-full"
+      role="img"
+      aria-label="Stretch reflex arc diagram"
+    >
       <ArrowDefs />
       <Step x={20} y={20} w={150} label="Muscle spindle" sub="detects stretch" color={teal} />
       <Arrow x1={95} y1={60} x2={95} y2={80} />
-      <Step x={20} y={85} w={150} label="Ia sensory afferent" sub="→ dorsal root ganglion" color={teal} />
+      <Step
+        x={20}
+        y={85}
+        w={150}
+        label="Ia sensory afferent"
+        sub="→ dorsal root ganglion"
+        color={teal}
+      />
       <Arrow x1={170} y1={105} x2={220} y2={105} />
-      <Step x={230} y={85} w={150} label="Alpha motor neuron" sub="spinal cord, same segment" color={amber} />
+      <Step
+        x={230}
+        y={85}
+        w={150}
+        label="Alpha motor neuron"
+        sub="spinal cord, same segment"
+        color={amber}
+      />
       <Arrow x1={305} y1={125} x2={305} y2={145} />
       <Step x={230} y={150} w={150} label="Same muscle contracts" color={rose} />
 
       <rect x="20" y="150" width="180" height="34" rx="8" fill={violet.bg} opacity={0.4} />
-      <text x="110" y="171" textAnchor="middle" fontSize="9" fill={violet.fg}>Monosynaptic — no interneuron</text>
+      <text x="110" y="171" textAnchor="middle" fontSize="9" fill={violet.fg}>
+        Monosynaptic — no interneuron
+      </text>
 
-      <circle r="4.5" fill={teal.fg}>
-        <animateMotion dur="4s" repeatCount="indefinite" path="M 95 40 L 95 105 L 305 105 L 305 165" />
-      </circle>
+      <MotionDot path="M 95 40 L 95 105 L 305 105 L 305 165" dur="4s" color={teal} />
     </svg>
   );
 }
 
 export function CardiacCycleDiagram() {
-  const phases = ["Atrial systole", "Isovolumetric contraction", "Ventricular ejection", "Isovolumetric relaxation", "Ventricular filling"];
+  const phases = [
+    "Atrial systole",
+    "Isovolumetric contraction",
+    "Ventricular ejection",
+    "Isovolumetric relaxation",
+    "Ventricular filling",
+  ];
   const colW = 100;
   return (
-    <svg viewBox={`0 0 ${phases.length * colW + 20} 130`} className="w-full" role="img" aria-label="Cardiac cycle diagram">
+    <svg
+      viewBox={`0 0 ${phases.length * colW + 20} 130`}
+      className="w-full"
+      role="img"
+      aria-label="Cardiac cycle diagram"
+    >
       <ArrowDefs />
       {phases.map((p, i) => {
         const x = 10 + i * colW;
@@ -113,20 +326,48 @@ export function CardiacCycleDiagram() {
           </g>
         );
       })}
-      <path d={`M ${phases.length * colW - 12} 84 C ${phases.length * colW - 12} 110, 50 110, 50 84`} fill="none" stroke={teal.fg} strokeOpacity={0.4} strokeWidth={1.6} markerEnd="url(#arrowhead)" />
-      <text x={(phases.length * colW + 20) / 2} y={20} textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">S1 = AV valve closure (start of systole) · S2 = semilunar valve closure (start of diastole)</text>
-      <circle r="5" fill={teal.fg}>
-        <animateMotion dur="6s" repeatCount="indefinite" path={`M 54 62 ${phases.map((_, i) => `L ${10 + i * colW + 44} 62`).join(" ")}`} />
-      </circle>
+      <path
+        d={`M ${phases.length * colW - 12} 84 C ${phases.length * colW - 12} 110, 50 110, 50 84`}
+        fill="none"
+        stroke={teal.fg}
+        strokeOpacity={0.4}
+        strokeWidth={1.6}
+        markerEnd="url(#arrowhead)"
+      />
+      <text
+        x={(phases.length * colW + 20) / 2}
+        y={20}
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        S1 = AV valve closure (start of systole) · S2 = semilunar valve closure (start of diastole)
+      </text>
+      <MotionDot
+        path={`M 54 62 ${phases.map((_, i) => `L ${10 + i * colW + 44} 62`).join(" ")}`}
+        dur="6s"
+        color={teal}
+      />
     </svg>
   );
 }
 
 export function CardiacConductionDiagram() {
-  const steps = ["SA node", "Atria depolarize", "AV node (delay)", "Bundle of His", "Purkinje fibers → ventricles"];
+  const steps = [
+    "SA node",
+    "Atria depolarize",
+    "AV node (delay)",
+    "Bundle of His",
+    "Purkinje fibers → ventricles",
+  ];
   const colW = 100;
   return (
-    <svg viewBox={`0 0 ${steps.length * colW + 20} 110`} className="w-full" role="img" aria-label="Cardiac conduction system diagram">
+    <svg
+      viewBox={`0 0 ${steps.length * colW + 20} 110`}
+      className="w-full"
+      role="img"
+      aria-label="Cardiac conduction system diagram"
+    >
       <ArrowDefs />
       {steps.map((s, i) => {
         const x = 10 + i * colW;
@@ -137,11 +378,30 @@ export function CardiacConductionDiagram() {
           </g>
         );
       })}
-      <circle r="5" fill={violet.fg}>
-        <animateMotion dur="5s" repeatCount="indefinite" path={`M 54 55 ${steps.map((_, i) => `L ${10 + i * colW + 44} 55`).join(" ")}`} />
-      </circle>
-      <text x={(steps.length * colW + 20) / 2} y="20" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">AV nodal delay allows atrial contraction to finish filling the ventricles before they contract</text>
-      <text x={(steps.length * colW + 20) / 2} y="100" textAnchor="middle" fontSize="9.5" fill="var(--color-muted-foreground)">SA node has the fastest intrinsic rate — the heart's normal pacemaker</text>
+      <MotionDot
+        path={`M 54 55 ${steps.map((_, i) => `L ${10 + i * colW + 44} 55`).join(" ")}`}
+        dur="5s"
+        color={violet}
+      />
+      <text
+        x={(steps.length * colW + 20) / 2}
+        y="20"
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        AV nodal delay allows atrial contraction to finish filling the ventricles before they
+        contract
+      </text>
+      <text
+        x={(steps.length * colW + 20) / 2}
+        y="100"
+        textAnchor="middle"
+        fontSize="9.5"
+        fill="var(--color-muted-foreground)"
+      >
+        SA node has the fastest intrinsic rate — the heart's normal pacemaker
+      </text>
     </svg>
   );
 }
@@ -150,68 +410,156 @@ export function OxyHemoglobinCurveDiagram() {
   const normalCurve = "M 30 160 C 60 158, 90 145, 120 100 C 150 55, 200 35, 320 30";
   const rightShift = "M 30 165 C 70 163, 110 155, 150 120 C 190 80, 240 50, 340 40";
   return (
-    <svg viewBox="0 0 400 200" className="w-full" role="img" aria-label="Oxygen-hemoglobin dissociation curve diagram">
+    <svg
+      viewBox="0 0 400 200"
+      className="w-full"
+      role="img"
+      aria-label="Oxygen-hemoglobin dissociation curve diagram"
+    >
       <ArrowDefs />
-      <line x1="30" y1="175" x2="360" y2="175" stroke="var(--color-muted-foreground)" strokeWidth={1.5} />
-      <line x1="30" y1="175" x2="30" y2="15" stroke="var(--color-muted-foreground)" strokeWidth={1.5} />
-      <text x="195" y="195" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">PO₂ (mmHg) →</text>
-      <text x="14" y="95" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)" transform="rotate(-90 14 95)">% Hb saturation →</text>
+      <line
+        x1="30"
+        y1="175"
+        x2="360"
+        y2="175"
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.5}
+      />
+      <line
+        x1="30"
+        y1="175"
+        x2="30"
+        y2="15"
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.5}
+      />
+      <text x="195" y="195" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">
+        PO₂ (mmHg) →
+      </text>
+      <text
+        x="14"
+        y="95"
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+        transform="rotate(-90 14 95)"
+      >
+        % Hb saturation →
+      </text>
       <path d={normalCurve} fill="none" stroke={teal.fg} strokeWidth={2.5} />
-      <text x="245" y="30" fontSize="9" fontWeight={700} fill={teal.fg}>Normal</text>
+      <text x="245" y="30" fontSize="9" fontWeight={700} fill={teal.fg}>
+        Normal
+      </text>
       <path d={rightShift} fill="none" stroke={rose.fg} strokeWidth={2.5} strokeDasharray="5 3" />
-      <text x="270" y="55" fontSize="9" fontWeight={700} fill={rose.fg}>Right shift (Bohr effect)</text>
-      <text x="60" y="35" fontSize="8.5" fill={rose.fg}>↑CO₂ ↓pH ↑temp ↑2,3-BPG</text>
-      <circle r="4.5" fill={teal.fg}>
-        <animateMotion dur="4s" repeatCount="indefinite" path={normalCurve} />
-      </circle>
+      <text x="270" y="55" fontSize="9" fontWeight={700} fill={rose.fg}>
+        Right shift (Bohr effect)
+      </text>
+      <text x="60" y="35" fontSize="8.5" fill={rose.fg}>
+        ↑CO₂ ↓pH ↑temp ↑2,3-BPG
+      </text>
+      <MotionDot path={normalCurve} dur="4s" color={teal} />
     </svg>
   );
 }
 
 export function BaroreceptorReflexDiagram() {
   return (
-    <svg viewBox="0 0 460 210" className="w-full" role="img" aria-label="Baroreceptor reflex diagram" >
+    <svg
+      viewBox="0 0 460 210"
+      className="w-full"
+      role="img"
+      aria-label="Baroreceptor reflex diagram"
+    >
       <ArrowDefs />
       <Step x={20} y={20} w={180} label="↓Blood pressure" color={rose} />
       <Arrow x1={110} y1={60} x2={110} y2={80} />
-      <Step x={20} y={85} w={180} label="↓Baroreceptor firing" sub="carotid sinus, aortic arch" color={rose} />
+      <Step
+        x={20}
+        y={85}
+        w={180}
+        label="↓Baroreceptor firing"
+        sub="carotid sinus, aortic arch"
+        color={rose}
+      />
       <Arrow x1={110} y1={125} x2={110} y2={145} />
       <Step x={20} y={150} w={180} label="↓Vagal, ↑sympathetic outflow" color={amber} />
 
       <Arrow x1={200} y1={170} x2={240} y2={170} />
-      <Step x={250} y={150} w={190} label="↑Heart rate, ↑contractility, vasoconstriction" color={teal} />
+      <Step
+        x={250}
+        y={150}
+        w={190}
+        label="↑Heart rate, ↑contractility, vasoconstriction"
+        color={teal}
+      />
       <Arrow x1={345} y1={148} x2={345} y2={40} />
       <Step x={250} y={20} w={190} label="Blood pressure restored" color={emerald} />
 
-      <circle r="4.5" fill={amber.fg}>
-        <animateMotion dur="5s" repeatCount="indefinite" path="M 110 40 L 110 105 L 110 170 L 345 170 L 345 40" />
-      </circle>
-      <text x="230" y="200" textAnchor="middle" fontSize="9.5" fill="var(--color-muted-foreground)">Fast-acting negative feedback loop — buffers acute BP changes within seconds</text>
+      <MotionDot path="M 110 40 L 110 105 L 110 170 L 345 170 L 345 40" dur="5s" color={amber} />
+      <text x="230" y="200" textAnchor="middle" fontSize="9.5" fill="var(--color-muted-foreground)">
+        Fast-acting negative feedback loop — buffers acute BP changes within seconds
+      </text>
     </svg>
   );
 }
 
 export function HpaAxisDiagram() {
-  const steps = ["Hypothalamus\nCRH", "Anterior pituitary\nACTH", "Adrenal cortex\nCortisol", "Negative feedback\non hypothalamus/pituitary"];
+  const steps = [
+    "Hypothalamus\nCRH",
+    "Anterior pituitary\nACTH",
+    "Adrenal cortex\nCortisol",
+    "Negative feedback\non hypothalamus/pituitary",
+  ];
   const colW = 118;
   return (
-    <svg viewBox={`0 0 ${steps.length * colW + 20} 130`} className="w-full" role="img" aria-label="Hypothalamic-pituitary-adrenal axis diagram">
+    <svg
+      viewBox={`0 0 ${steps.length * colW + 20} 130`}
+      className="w-full"
+      role="img"
+      aria-label="Hypothalamic-pituitary-adrenal axis diagram"
+    >
       <ArrowDefs />
       {steps.map((s, i) => {
         const x = 10 + i * colW;
         const [label, sub] = s.split("\n");
         return (
           <g key={s}>
-            <Step x={x} y={40} w={104} h={44} label={label ?? ""} {...(sub ? { sub } : {})} color={i === 3 ? violet : amber} />
+            <Step
+              x={x}
+              y={40}
+              w={104}
+              h={44}
+              label={label ?? ""}
+              {...(sub ? { sub } : {})}
+              color={i === 3 ? violet : amber}
+            />
             {i < steps.length - 1 && <Arrow x1={x + 104} y1={62} x2={x + colW - 6} y2={62} />}
           </g>
         );
       })}
-      <path d={`M ${steps.length * colW - 8} 84 C ${steps.length * colW - 8} 110, 60 110, 60 84`} fill="none" stroke={violet.fg} strokeOpacity={0.4} strokeWidth={1.6} markerEnd="url(#arrowhead)" />
-      <text x={(steps.length * colW + 20) / 2} y="20" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">Rising cortisol suppresses further CRH/ACTH release — classic negative feedback endocrine axis</text>
-      <circle r="5" fill={amber.fg}>
-        <animateMotion dur="6s" repeatCount="indefinite" path={`M 62 62 ${steps.map((_, i) => `L ${10 + i * colW + 52} 62`).join(" ")}`} />
-      </circle>
+      <path
+        d={`M ${steps.length * colW - 8} 84 C ${steps.length * colW - 8} 110, 60 110, 60 84`}
+        fill="none"
+        stroke={violet.fg}
+        strokeOpacity={0.4}
+        strokeWidth={1.6}
+        markerEnd="url(#arrowhead)"
+      />
+      <text
+        x={(steps.length * colW + 20) / 2}
+        y="20"
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        Rising cortisol suppresses further CRH/ACTH release — classic negative feedback endocrine
+        axis
+      </text>
+      <MotionDot
+        path={`M 62 62 ${steps.map((_, i) => `L ${10 + i * colW + 52} 62`).join(" ")}`}
+        dur="6s"
+        color={amber}
+      />
     </svg>
   );
 }
@@ -223,29 +571,74 @@ export function MenstrualCycleDiagram() {
     { label: "Luteal phase", sub: "Corpus luteum → progesterone", color: rose },
     { label: "Menstruation", sub: "Corpus luteum regresses, hormones fall", color: violet },
   ];
-  const cx = 230, cy = 120, r = 78;
+  const cx = 230,
+    cy = 120,
+    r = 78;
   return (
-    <svg viewBox="0 0 460 240" className="w-full" role="img" aria-label="Menstrual cycle hormone phases diagram">
+    <svg
+      viewBox="0 0 460 240"
+      className="w-full"
+      role="img"
+      aria-label="Menstrual cycle hormone phases diagram"
+    >
       <ArrowDefs />
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--color-muted-foreground)" strokeOpacity={0.3} strokeWidth={1.5} />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke="var(--color-muted-foreground)"
+        strokeOpacity={0.3}
+        strokeWidth={1.5}
+      />
       {phases.map((p, i) => {
         const angle = (i / phases.length) * 2 * Math.PI - Math.PI / 2;
         const x = cx + r * Math.cos(angle);
         const y = cy + r * Math.sin(angle);
         return (
           <g key={p.label}>
-            <circle cx={x} cy={y} r={48} fill={p.color.bg} stroke={p.color.fg} strokeOpacity={0.35} />
-            <text x={x} y={y - 4} textAnchor="middle" fontSize="10" fontWeight={700} fill={p.color.fg}>{p.label}</text>
+            <circle
+              cx={x}
+              cy={y}
+              r={48}
+              fill={p.color.bg}
+              stroke={p.color.fg}
+              strokeOpacity={0.35}
+            />
+            <text
+              x={x}
+              y={y - 4}
+              textAnchor="middle"
+              fontSize="10"
+              fontWeight={700}
+              fill={p.color.fg}
+            >
+              {p.label}
+            </text>
             <foreignObject x={x - 42} y={y - 0} width="84" height="36">
-              <p style={{ fontSize: "7.5px", textAlign: "center", color: p.color.fg, lineHeight: 1.2, margin: 0 }}>{p.sub}</p>
+              <p
+                style={{
+                  fontSize: "7.5px",
+                  textAlign: "center",
+                  color: p.color.fg,
+                  lineHeight: 1.2,
+                  margin: 0,
+                }}
+              >
+                {p.sub}
+              </p>
             </foreignObject>
           </g>
         );
       })}
-      <circle r="5" fill={amber.fg}>
-        <animateMotion dur="8s" repeatCount="indefinite" path={`M ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx + r - 0.01} ${cy}`} />
-      </circle>
-      <text x={cx} y="20" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">Average cycle ~28 days; ovulation ~14 days before next expected period</text>
+      <MotionDot
+        path={`M ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx + r - 0.01} ${cy}`}
+        dur="8s"
+        color={amber}
+      />
+      <text x={cx} y="20" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">
+        Average cycle ~28 days; ovulation ~14 days before next expected period
+      </text>
     </svg>
   );
 }
@@ -260,21 +653,45 @@ export function NephronSegmentsDiagram() {
   ];
   const colW = 108;
   return (
-    <svg viewBox={`0 0 ${segments.length * colW + 20} 130`} className="w-full" role="img" aria-label="Nephron segments and function diagram">
+    <svg
+      viewBox={`0 0 ${segments.length * colW + 20} 130`}
+      className="w-full"
+      role="img"
+      aria-label="Nephron segments and function diagram"
+    >
       <ArrowDefs />
       {segments.map((s, i) => {
         const x = 10 + i * colW;
         return (
           <g key={s.label}>
-            <Step x={x} y={40} w={96} h={48} label={s.label} sub={s.sub} color={i === 0 ? rose : teal} />
+            <Step
+              x={x}
+              y={40}
+              w={96}
+              h={48}
+              label={s.label}
+              sub={s.sub}
+              color={i === 0 ? rose : teal}
+            />
             {i < segments.length - 1 && <Arrow x1={x + 96} y1={64} x2={x + colW - 6} y2={64} />}
           </g>
         );
       })}
-      <circle r="5" fill={teal.fg}>
-        <animateMotion dur="7s" repeatCount="indefinite" path={`M 58 64 ${segments.map((_, i) => `L ${10 + i * colW + 48} 64`).join(" ")}`} />
-      </circle>
-      <text x={(segments.length * colW + 20) / 2} y={20} textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">Filtration → reabsorption → secretion — urine composition is finalized by the collecting duct</text>
+      <MotionDot
+        path={`M 58 64 ${segments.map((_, i) => `L ${10 + i * colW + 48} 64`).join(" ")}`}
+        dur="7s"
+        color={teal}
+      />
+      <text
+        x={(segments.length * colW + 20) / 2}
+        y={20}
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        Filtration → reabsorption → secretion — urine composition is finalized by the collecting
+        duct
+      </text>
     </svg>
   );
 }
@@ -282,20 +699,401 @@ export function NephronSegmentsDiagram() {
 export function FrankStarlingDiagram() {
   const curve = "M 30 170 C 100 160, 160 60, 260 40 C 320 28, 360 30, 390 35";
   return (
-    <svg viewBox="0 0 420 200" className="w-full" role="img" aria-label="Frank-Starling curve diagram">
+    <svg
+      viewBox="0 0 420 200"
+      className="w-full"
+      role="img"
+      aria-label="Frank-Starling curve diagram"
+    >
       <ArrowDefs />
-      <line x1="30" y1="180" x2="400" y2="180" stroke="var(--color-muted-foreground)" strokeWidth={1.5} />
-      <line x1="30" y1="180" x2="30" y2="15" stroke="var(--color-muted-foreground)" strokeWidth={1.5} />
-      <text x="215" y="196" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">Ventricular end-diastolic volume (preload) →</text>
-      <text x="14" y="100" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)" transform="rotate(-90 14 100)">Stroke volume →</text>
+      <line
+        x1="30"
+        y1="180"
+        x2="400"
+        y2="180"
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.5}
+      />
+      <line
+        x1="30"
+        y1="180"
+        x2="30"
+        y2="15"
+        stroke="var(--color-muted-foreground)"
+        strokeWidth={1.5}
+      />
+      <text x="215" y="196" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">
+        Ventricular end-diastolic volume (preload) →
+      </text>
+      <text
+        x="14"
+        y="100"
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+        transform="rotate(-90 14 100)"
+      >
+        Stroke volume →
+      </text>
       <path d={curve} fill="none" stroke={violet.fg} strokeWidth={2.5} />
-      <path d="M 30 175 C 100 168, 160 90, 260 70 C 320 58, 360 60, 390 65" fill="none" stroke={teal.fg} strokeWidth={2} strokeDasharray="5 3" opacity={0.7} />
-      <text x="300" y="55" fontSize="9" fontWeight={700} fill={teal.fg}>↑Contractility (e.g. sympathetic)</text>
-      <text x="280" y="30" fontSize="9" fontWeight={700} fill={violet.fg}>Normal</text>
-      <circle r="5" fill={violet.fg}>
-        <animateMotion dur="4s" repeatCount="indefinite" path={curve} />
-      </circle>
-      <text x="215" y="14" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">The whole curve shifts up-left with increased contractility, down-right in heart failure</text>
+      <path
+        d="M 30 175 C 100 168, 160 90, 260 70 C 320 58, 360 60, 390 65"
+        fill="none"
+        stroke={teal.fg}
+        strokeWidth={2}
+        strokeDasharray="5 3"
+        opacity={0.7}
+      />
+      <text x="300" y="55" fontSize="9" fontWeight={700} fill={teal.fg}>
+        ↑Contractility (e.g. sympathetic)
+      </text>
+      <text x="280" y="30" fontSize="9" fontWeight={700} fill={violet.fg}>
+        Normal
+      </text>
+      <MotionDot path={curve} dur="4s" color={violet} />
+      <text x="215" y="14" textAnchor="middle" fontSize="10" fill="var(--color-muted-foreground)">
+        The whole curve shifts up-left with increased contractility, down-right in heart failure
+      </text>
+    </svg>
+  );
+}
+
+export function RaasDiagram() {
+  const steps = [
+    "↓Renal perfusion\npressure",
+    "JG cells release\nRenin",
+    "Angiotensinogen →\nAngiotensin I",
+    "ACE (lungs) →\nAngiotensin II",
+  ];
+  const colW = 115;
+  const chainEnd = 10 + (steps.length - 1) * colW + 100;
+  return (
+    <svg
+      viewBox={`0 0 ${steps.length * colW + 120} 190`}
+      className="w-full"
+      role="img"
+      aria-label="Renin-angiotensin-aldosterone system diagram"
+    >
+      <ArrowDefs />
+      {steps.map((s, i) => {
+        const x = 10 + i * colW;
+        const [label, sub] = s.split("\n");
+        return (
+          <g key={s}>
+            <Step
+              x={x}
+              y={40}
+              w={100}
+              h={44}
+              label={label ?? ""}
+              {...(sub ? { sub } : {})}
+              color={i === 3 ? rose : blue}
+            />
+            {i < steps.length - 1 && <Arrow x1={x + 100} y1={62} x2={x + colW - 6} y2={62} />}
+          </g>
+        );
+      })}
+      <Arrow x1={chainEnd - 90} y1={84} x2={chainEnd - 90} y2={110} />
+      <Step
+        x={chainEnd - 165}
+        y={115}
+        w={150}
+        h={40}
+        label="Vasoconstriction"
+        sub="↑Peripheral resistance"
+        color={rose}
+      />
+      <Arrow x1={chainEnd - 30} y1={84} x2={chainEnd - 30} y2={110} />
+      <Step
+        x={chainEnd - 5}
+        y={115}
+        w={160}
+        h={40}
+        label="Aldosterone (adrenal)"
+        sub="↑Na⁺/H₂O retention"
+        color={amber}
+      />
+      <text
+        x={(steps.length * colW + 120) / 2}
+        y="175"
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        Net effect: restores blood pressure and effective circulating volume
+      </text>
+      <MotionDot
+        path={`M 60 62 ${steps.map((_, i) => `L ${10 + i * colW + 50} 62`).join(" ")}`}
+        dur="6s"
+        color={blue}
+      />
+    </svg>
+  );
+}
+
+export function CoagulationCascadeDiagram() {
+  return (
+    <svg
+      viewBox="0 0 460 230"
+      className="w-full"
+      role="img"
+      aria-label="Coagulation cascade diagram"
+    >
+      <ArrowDefs />
+      <Step
+        x={20}
+        y={15}
+        w={180}
+        h={44}
+        label="Extrinsic pathway"
+        sub="Tissue factor + Factor VIIa"
+        color={rose}
+      />
+      <Step
+        x={260}
+        y={15}
+        w={180}
+        h={44}
+        label="Intrinsic pathway"
+        sub="Contact activation: XII→XI→IX"
+        color={blue}
+      />
+      <Arrow x1={110} y1={59} x2={185} y2={100} />
+      <Arrow x1={350} y1={59} x2={275} y2={100} />
+      <Step
+        x={140}
+        y={105}
+        w={180}
+        h={44}
+        label="Factor X → Xa"
+        sub="Common pathway begins"
+        color={amber}
+      />
+      <Arrow x1={230} y1={149} x2={230} y2={170} />
+      <Step x={140} y={175} w={180} h={40} label="Prothrombin → Thrombin" color={teal} />
+      <Arrow x1={350} y1={195} x2={390} y2={195} />
+      <text x="435" y="199" fontSize="9.5" fontWeight={700} fill={teal.fg}>
+        → Fibrinogen
+      </text>
+      <text x="435" y="211" fontSize="9.5" fontWeight={700} fill={teal.fg}>
+        → Fibrin clot
+      </text>
+      <MotionDot path="M 110 59 L 185 100 L 230 149 L 230 195" dur="4s" color={rose} />
+      <MotionDot path="M 350 59 L 275 100 L 230 149" dur="4s" color={blue} />
+      <text x="230" y="225" textAnchor="middle" fontSize="9.5" fill="var(--color-muted-foreground)">
+        Warfarin blocks vitamin K-dependent factors (II, VII, IX, X); heparin potentiates
+        antithrombin
+      </text>
+    </svg>
+  );
+}
+
+export function StarlingForcesDiagram() {
+  return (
+    <svg
+      viewBox="0 0 440 200"
+      className="w-full"
+      role="img"
+      aria-label="Capillary Starling forces diagram"
+    >
+      <ArrowDefs />
+      <rect
+        x={40}
+        y={80}
+        width={360}
+        height={30}
+        rx={15}
+        fill={rose.bg}
+        stroke={rose.fg}
+        strokeOpacity={0.3}
+        filter="url(#soft-shadow)"
+      />
+      <text x={220} y={100} textAnchor="middle" fontSize="10" fontWeight={700} fill={rose.fg}>
+        Capillary lumen
+      </text>
+      <text x={90} y={60} textAnchor="middle" fontSize="9.5" fontWeight={700} fill={teal.fg}>
+        Arterial end
+      </text>
+      <text x={90} y={72} textAnchor="middle" fontSize="8.5" fill={teal.fg}>
+        Capillary hydrostatic {">"} oncotic
+      </text>
+      <Arrow x1={90} y1={78} x2={90} y2={40} />
+      <text x={90} y={30} textAnchor="middle" fontSize="9" fontWeight={700} fill={teal.fg}>
+        Net filtration →
+      </text>
+      <text x={350} y={60} textAnchor="middle" fontSize="9.5" fontWeight={700} fill={amber.fg}>
+        Venous end
+      </text>
+      <text x={350} y={72} textAnchor="middle" fontSize="8.5" fill={amber.fg}>
+        Oncotic {">"} capillary hydrostatic
+      </text>
+      <Arrow x1={350} y1={40} x2={350} y2={78} />
+      <text x={350} y={30} textAnchor="middle" fontSize="9" fontWeight={700} fill={amber.fg}>
+        ← Net absorption
+      </text>
+      <rect x={40} y={130} width={360} height={30} rx={8} fill={violet.bg} opacity={0.4} />
+      <text x={220} y={150} textAnchor="middle" fontSize="9.5" fill={violet.fg}>
+        Excess filtered fluid returns via lymphatics
+      </text>
+      <MotionDot path="M 90 78 L 90 60" dur="2s" color={teal} />
+      <MotionDot path="M 350 60 L 350 78" dur="2s" color={amber} />
+      <text x={220} y={185} textAnchor="middle" fontSize="9.5" fill="var(--color-muted-foreground)">
+        Hypoalbuminemia lowers plasma oncotic pressure, tipping the balance toward net filtration —
+        edema
+      </text>
+    </svg>
+  );
+}
+
+export function ChemoreceptorControlDiagram() {
+  return (
+    <svg
+      viewBox="0 0 460 210"
+      className="w-full"
+      role="img"
+      aria-label="Chemoreceptor control of breathing diagram"
+    >
+      <ArrowDefs />
+      <Step
+        x={20}
+        y={20}
+        w={190}
+        label="Central chemoreceptors"
+        sub="medulla, sense CSF pH/CO₂"
+        color={blue}
+      />
+      <Arrow x1={115} y1={60} x2={115} y2={90} />
+      <Step
+        x={20}
+        y={95}
+        w={190}
+        label="Peripheral chemoreceptors"
+        sub="carotid/aortic bodies, sense O₂"
+        color={teal}
+      />
+      <Arrow x1={210} y1={40} x2={250} y2={40} />
+      <Arrow x1={210} y1={115} x2={250} y2={80} />
+      <Step x={260} y={40} w={180} h={44} label="Medullary respiratory center" color={amber} />
+      <Arrow x1={350} y1={84} x2={350} y2={110} />
+      <Step x={260} y={115} w={180} label="↑Rate & depth of breathing" color={rose} />
+      <MotionDot path="M 115 60 L 115 40 L 250 40" dur="4s" color={blue} />
+      <MotionDot path="M 115 135 L 250 80 L 250 62" dur="4s" color={teal} />
+      <text x="230" y="190" textAnchor="middle" fontSize="9.5" fill="var(--color-muted-foreground)">
+        CO₂ (via CSF pH) is the main drive at rest — peripheral O₂ sensing dominates only when PO₂
+        drops sharply
+      </text>
+    </svg>
+  );
+}
+
+export function HptAxisDiagram() {
+  const steps = [
+    "Hypothalamus\nTRH",
+    "Anterior pituitary\nTSH",
+    "Thyroid gland\nT3/T4",
+    "Negative feedback\non hypothalamus/pituitary",
+  ];
+  const colW = 118;
+  return (
+    <svg
+      viewBox={`0 0 ${steps.length * colW + 20} 130`}
+      className="w-full"
+      role="img"
+      aria-label="Hypothalamic-pituitary-thyroid axis diagram"
+    >
+      <ArrowDefs />
+      {steps.map((s, i) => {
+        const x = 10 + i * colW;
+        const [label, sub] = s.split("\n");
+        return (
+          <g key={s}>
+            <Step
+              x={x}
+              y={40}
+              w={104}
+              h={44}
+              label={label ?? ""}
+              {...(sub ? { sub } : {})}
+              color={i === 3 ? magenta : teal}
+            />
+            {i < steps.length - 1 && <Arrow x1={x + 104} y1={62} x2={x + colW - 6} y2={62} />}
+          </g>
+        );
+      })}
+      <path
+        d={`M ${steps.length * colW - 8} 84 C ${steps.length * colW - 8} 110, 60 110, 60 84`}
+        fill="none"
+        stroke={magenta.fg}
+        strokeOpacity={0.4}
+        strokeWidth={1.6}
+        markerEnd="url(#arrowhead)"
+      />
+      <text
+        x={(steps.length * colW + 20) / 2}
+        y="20"
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        Primary hypothyroidism: ↑TSH, ↓T4 · Secondary (pituitary) hypothyroidism: ↓TSH, ↓T4
+      </text>
+      <MotionDot
+        path={`M 62 62 ${steps.map((_, i) => `L ${10 + i * colW + 52} 62`).join(" ")}`}
+        dur="6s"
+        color={teal}
+      />
+    </svg>
+  );
+}
+
+export function GastricPhasesDiagram() {
+  const phases = [
+    { label: "Cephalic phase", sub: "Sight/smell/taste → vagal stimulation", color: violet },
+    { label: "Gastric phase", sub: "Distension + peptides → gastrin release", color: amber },
+    { label: "Intestinal phase", sub: "Acidic chyme → secretin, enterogastrone", color: rose },
+  ];
+  const colW = 150;
+  return (
+    <svg
+      viewBox={`0 0 ${phases.length * colW + 20} 140`}
+      className="w-full"
+      role="img"
+      aria-label="Phases of gastric secretion diagram"
+    >
+      <ArrowDefs />
+      {phases.map((p, i) => {
+        const x = 10 + i * colW;
+        return (
+          <g key={p.label}>
+            <Step x={x} y={40} w={130} h={50} label={p.label} sub={p.sub} color={p.color} />
+            {i < phases.length - 1 && <Arrow x1={x + 130} y1={65} x2={x + colW - 6} y2={65} />}
+          </g>
+        );
+      })}
+      <MotionDot
+        path={`M 74 65 ${phases.map((_, i) => `L ${10 + i * colW + 64} 65`).join(" ")}`}
+        dur="6s"
+        color={amber}
+      />
+      <text
+        x={(phases.length * colW + 20) / 2}
+        y={20}
+        textAnchor="middle"
+        fontSize="10"
+        fill="var(--color-muted-foreground)"
+      >
+        The gastric phase contributes the largest share (~60%) of total gastric acid secretion
+      </text>
+      <text
+        x={(phases.length * colW + 20) / 2}
+        y={125}
+        textAnchor="middle"
+        fontSize="9.5"
+        fill="var(--color-muted-foreground)"
+      >
+        Intestinal phase mostly inhibits further gastric emptying/secretion once chyme is acidic
+        enough
+      </text>
     </svg>
   );
 }
