@@ -7,6 +7,8 @@ export interface Topic {
   unit: string;
   weightage: Weightage;
   examNote: string;
+  /** NMC-CBME module code (e.g. "PY5"), or "NMC mapping pending" where we don't have a verified code. */
+  nmcModule: string;
 }
 
 export interface FactItem {
@@ -15,106 +17,132 @@ export interface FactItem {
   fact: string;
   question: string;
   answer: string;
+  /** Only set for a subset of facts we're confident about — not every fact is classified. */
+  priority?: "must-know" | "important" | "supporting";
 }
 
+// 12 modules, aligned to the NMC-CBME 2024 Physiology curriculum structure.
+// NMC module codes (PY1, PY2, ...) are shown only where a specific module
+// number is well documented (e.g. PY1 General Physiology, PY5 Cardiovascular
+// Physiology). We do not fabricate competency-level codes (e.g. "PY5.2") or
+// module numbers we can't verify — those show "NMC mapping pending" instead.
 export const TOPICS: Topic[] = [
   {
     id: "general",
-    unit: "Unit 1 · General & Cell Physiology",
-    name: "General & Cell Physiology",
+    unit: "Module 1 · General Physiology",
+    name: "General Physiology",
     blurb: "Homeostasis, membrane transport, resting membrane potential, and cell signaling.",
     weightage: "foundational",
     examNote:
-      "Conceptual foundation for every other system — rarely tested as standalone NEET PG questions, but essential groundwork.",
+      "Conceptual foundation for every other module — fewer standalone NEET PG questions, but essential groundwork.",
+    nmcModule: "PY1",
   },
   {
     id: "blood",
-    unit: "Unit 2 · Blood",
-    name: "Blood",
+    unit: "Module 2 · Blood & Immunity",
+    name: "Blood & Immunity",
     blurb: "Plasma, RBC physiology, hemostasis, blood groups, and immunity basics.",
-    weightage: "moderate",
-    examNote:
-      "A steady, moderate source of questions — hemostasis and blood groups recur most often.",
+    weightage: "high",
+    examNote: "A dependable source of questions — hemostasis and blood groups recur most often.",
+    nmcModule: "PY2",
   },
   {
     id: "nerve-muscle",
-    unit: "Unit 3 · Nerve & Muscle",
-    name: "Nerve & Muscle Physiology",
+    unit: "Module 3 · Nerve-Muscle Physiology",
+    name: "Nerve-Muscle Physiology",
     blurb: "Action potentials, synaptic transmission, and the sliding filament mechanism.",
-    weightage: "moderate",
-    examNote:
-      "Core mechanisms (action potentials, NMJ, cross-bridge cycle) come up regularly and underpin CNS and CVS questions too.",
-  },
-  {
-    id: "cns",
-    unit: "Unit 4 · Central Nervous System",
-    name: "Central Nervous System",
-    blurb: "Reflexes, motor pathways, cerebellum, basal ganglia, and higher functions.",
-    weightage: "moderate",
-    examNote:
-      "Reflex arcs, cerebellar/basal ganglia signs, and aphasias are the parts most often tested.",
-  },
-  {
-    id: "special-senses",
-    unit: "Unit 5 · Special Senses",
-    name: "Special Senses",
-    blurb: "Vision, hearing, taste, and smell — receptor physiology and pathways.",
-    weightage: "foundational",
-    examNote:
-      "One of the lighter-tested physiology units in most NEET PG papers — worth a solid pass, not deep prioritization.",
-  },
-  {
-    id: "cvs",
-    unit: "Unit 6 · Cardiovascular System",
-    name: "Cardiovascular System",
-    blurb: "Cardiac cycle, conduction system, blood pressure regulation, and cardiac output.",
-    weightage: "very-high",
-    examNote:
-      "Consistently one of the two highest-yield physiology systems — cardiac cycle, ECG basics, and BP regulation are exam favorites.",
-  },
-  {
-    id: "respiratory",
-    unit: "Unit 7 · Respiratory System",
-    name: "Respiratory System",
-    blurb: "Lung volumes, gas exchange, oxygen-hemoglobin dissociation, and control of breathing.",
-    weightage: "very-high",
-    examNote:
-      "The other top-yield system — the O2-Hb curve and control of breathing are especially frequent.",
-  },
-  {
-    id: "renal",
-    unit: "Unit 8 · Renal Physiology",
-    name: "Renal Physiology",
-    blurb: "Glomerular filtration, tubular transport, and acid-base/fluid regulation.",
     weightage: "high",
     examNote:
-      "GFR regulation, acid-base physiology, and RTA subtypes are recurring high-yield themes.",
+      "Core mechanisms (action potentials, NMJ, cross-bridge cycle) come up regularly and underpin CVS and Neurophysiology questions too.",
+    nmcModule: "PY3",
   },
   {
     id: "gi",
-    unit: "Unit 9 · Gastrointestinal System",
-    name: "Gastrointestinal System",
+    unit: "Module 4 · Gastrointestinal Physiology",
+    name: "Gastrointestinal Physiology",
     blurb: "Digestion, motility, secretion, and GI hormones.",
     weightage: "moderate",
     examNote:
       "GI hormones and secretion mechanisms are tested moderately, often integrated with biochemistry.",
+    nmcModule: "PY4",
+  },
+  {
+    id: "cvs",
+    unit: "Module 5 · Cardiovascular Physiology",
+    name: "Cardiovascular Physiology",
+    blurb: "Cardiac cycle, conduction system, blood pressure regulation, and cardiac output.",
+    weightage: "very-high",
+    examNote:
+      "Consistently one of the highest-priority modules for revision — cardiac cycle, ECG basics, and BP regulation are exam favorites.",
+    nmcModule: "PY5",
+  },
+  {
+    id: "respiratory",
+    unit: "Module 6 · Respiratory Physiology",
+    name: "Respiratory Physiology",
+    blurb: "Lung volumes, gas exchange, oxygen-hemoglobin dissociation, and control of breathing.",
+    weightage: "very-high",
+    examNote:
+      "Another top-priority module — the O2-Hb curve and control of breathing are especially frequent.",
+    nmcModule: "PY6",
+  },
+  {
+    id: "renal",
+    unit: "Module 7 · Renal Physiology",
+    name: "Renal Physiology",
+    blurb: "Glomerular filtration, tubular transport, and acid-base/fluid regulation.",
+    weightage: "very-high",
+    examNote: "GFR regulation, acid-base physiology, and RTA subtypes are recurring themes.",
+    nmcModule: "NMC mapping pending",
   },
   {
     id: "endocrine",
-    unit: "Unit 10 · Endocrine Physiology",
+    unit: "Module 8 · Endocrine Physiology",
     name: "Endocrine Physiology",
     blurb: "Hormone feedback loops and the physiology of major endocrine glands.",
     weightage: "high",
     examNote:
-      "Hormonal axes (thyroid, adrenal, calcium, ADH) are dependably high-yield and integrate heavily with medicine.",
+      "Hormonal axes (thyroid, adrenal, calcium, ADH) are dependably high-priority and integrate heavily with medicine.",
+    nmcModule: "NMC mapping pending",
   },
   {
     id: "reproductive",
-    unit: "Unit 11 · Reproductive Physiology",
+    unit: "Module 9 · Reproductive Physiology",
     name: "Reproductive Physiology",
     blurb: "Gametogenesis, menstrual cycle, pregnancy, and lactation physiology.",
-    weightage: "moderate",
+    weightage: "high",
     examNote: "The menstrual cycle and key hormone actions are the parts most likely to appear.",
+    nmcModule: "NMC mapping pending",
+  },
+  {
+    id: "cns",
+    unit: "Module 10 · Neurophysiology",
+    name: "Neurophysiology",
+    blurb: "Reflexes, motor pathways, cerebellum, basal ganglia, and higher functions.",
+    weightage: "very-high",
+    examNote:
+      "Reflex arcs, cerebellar/basal ganglia signs, and aphasias are consistently high-priority.",
+    nmcModule: "NMC mapping pending",
+  },
+  {
+    id: "special-senses",
+    unit: "Module 11 · Special Senses",
+    name: "Special Senses",
+    blurb: "Vision, hearing, taste, and smell — receptor physiology and pathways.",
+    weightage: "moderate",
+    examNote: "A smaller, steadier share of questions — worth a solid pass, not deep priority.",
+    nmcModule: "NMC mapping pending",
+  },
+  {
+    id: "integrated",
+    unit: "Module 12 · Integrated Physiology",
+    name: "Integrated Physiology",
+    blurb:
+      "Exercise physiology, temperature regulation, ageing, growth, obesity, brain death, BLS, and applied physiology.",
+    weightage: "foundational",
+    examNote:
+      "Cuts across every system — shows up as applied/integrated questions rather than a dedicated block.",
+    nmcModule: "PY11",
   },
 ];
 
@@ -126,6 +154,7 @@ export const FACTS: FactItem[] = [
     fact: "The resting membrane potential of most cells (~-70mV) is set mainly by the high resting permeability of the membrane to K+ and the K+ concentration gradient maintained by the Na+/K+-ATPase.",
     question: "What ion's permeability mainly determines the resting membrane potential?",
     answer: "Potassium (K+) — the membrane is far more permeable to K+ at rest than to Na+.",
+    priority: "important",
   },
   {
     id: "gen-2",
@@ -235,6 +264,7 @@ export const FACTS: FactItem[] = [
     fact: "An action potential is triggered once depolarization reaches threshold, driven by rapid voltage-gated Na+ channel opening (depolarization) followed by Na+ channel inactivation and K+ channel opening (repolarization).",
     question: "Which ion channel opening causes the depolarization phase of an action potential?",
     answer: "Voltage-gated Na+ channels.",
+    priority: "must-know",
   },
   {
     id: "nm-2",
@@ -308,6 +338,7 @@ export const FACTS: FactItem[] = [
     question: "Why is the knee-jerk reflex called 'monosynaptic'?",
     answer:
       "Because the sensory afferent (Ia fiber) synapses directly onto the motor neuron with no interneuron in between.",
+    priority: "must-know",
   },
   {
     id: "cns-2",
@@ -417,6 +448,7 @@ export const FACTS: FactItem[] = [
     fact: "The cardiac cycle consists of systole (ventricular contraction/ejection) and diastole (ventricular relaxation/filling); the first heart sound (S1) marks AV valve closure at the start of systole, S2 marks semilunar valve closure at the start of diastole.",
     question: "What event does the first heart sound (S1) correspond to?",
     answer: "Closure of the AV valves (mitral and tricuspid) at the start of ventricular systole.",
+    priority: "must-know",
   },
   {
     id: "cvs-2",
@@ -432,6 +464,7 @@ export const FACTS: FactItem[] = [
     fact: "Cardiac output = stroke volume × heart rate; stroke volume is influenced by preload (Frank-Starling law), afterload, and contractility.",
     question: "What is the formula for cardiac output?",
     answer: "Cardiac output = stroke volume × heart rate.",
+    priority: "must-know",
   },
   {
     id: "cvs-4",
@@ -440,6 +473,7 @@ export const FACTS: FactItem[] = [
     question: "What does the Frank-Starling law describe?",
     answer:
       "That increased ventricular filling (preload) increases the force of the subsequent contraction, up to a physiological limit.",
+    priority: "must-know",
   },
   {
     id: "cvs-5",
@@ -501,6 +535,7 @@ export const FACTS: FactItem[] = [
     question: "Why can't residual volume be measured directly by spirometry?",
     answer:
       "Because it is the air remaining in the lungs after maximal exhalation — spirometry can only measure volumes that are actually exhaled/inhaled.",
+    priority: "must-know",
   },
   {
     id: "resp-2",
@@ -509,6 +544,7 @@ export const FACTS: FactItem[] = [
     question: "What is the Bohr effect?",
     answer:
       "A rightward shift of the O2-Hb dissociation curve (reduced O2 affinity) caused by increased CO2/decreased pH, favoring O2 unloading to metabolically active tissue.",
+    priority: "must-know",
   },
   {
     id: "resp-3",
@@ -580,6 +616,7 @@ export const FACTS: FactItem[] = [
     question: "Why is creatinine used to estimate GFR?",
     answer:
       "Because it is freely filtered at the glomerulus and undergoes minimal tubular reabsorption or secretion, closely reflecting filtration alone.",
+    priority: "must-know",
   },
   {
     id: "renal-2",
@@ -618,6 +655,7 @@ export const FACTS: FactItem[] = [
     question: "What three stimuli trigger renin release from juxtaglomerular cells?",
     answer:
       "Low renal perfusion pressure, low NaCl delivery to the macula densa, and increased sympathetic activity.",
+    priority: "must-know",
   },
   {
     id: "renal-7",
@@ -727,6 +765,7 @@ export const FACTS: FactItem[] = [
     fact: "Insulin, secreted by pancreatic beta cells in response to rising blood glucose, promotes glucose uptake (via GLUT4 in muscle/fat), glycogenesis, and lipogenesis — the primary anabolic, fed-state hormone.",
     question: "Which GLUT transporter does insulin recruit to the cell membrane in muscle and fat?",
     answer: "GLUT4.",
+    priority: "important",
   },
   {
     id: "endo-3",
@@ -840,35 +879,107 @@ export const FACTS: FactItem[] = [
     question: "How does prolactin contribute to lactational amenorrhea?",
     answer: "High prolactin suppresses GnRH release, which reduces LH/FSH and therefore ovulation.",
   },
+
+  // ---- Integrated Physiology ----
+  {
+    id: "int-1",
+    topicId: "integrated",
+    fact: "During dynamic exercise, cardiac output rises mainly through increased heart rate (stroke volume plateaus earlier), while total peripheral resistance falls overall as vasodilation in exercising muscle outweighs vasoconstriction elsewhere.",
+    question: "What is the main driver of increased cardiac output during dynamic exercise?",
+    answer:
+      "Increased heart rate — stroke volume rises early but plateaus, so further increases in cardiac output come mainly from heart rate.",
+  },
+  {
+    id: "int-2",
+    topicId: "integrated",
+    fact: "The hypothalamic thermoregulatory center maintains core temperature via a negative feedback set point; in fever, pyrogens (e.g. IL-1, IL-6) raise this set point itself, so the body generates heat (shivering, vasoconstriction) to reach the new, higher target.",
+    question: "What actually changes in the hypothalamus during a fever?",
+    answer:
+      "The thermoregulatory set point is raised by pyrogens, so the body actively generates and conserves heat to reach the new, higher target temperature.",
+  },
+  {
+    id: "int-3",
+    topicId: "integrated",
+    fact: "Acclimatization to heat increases sweat gland output and reduces sweat sodium concentration (via aldosterone-driven reabsorption in the duct), improving evaporative cooling while conserving electrolytes.",
+    question: "What is the key sweat gland adaptation seen with heat acclimatization?",
+    answer:
+      "Increased total sweat output with reduced sweat sodium concentration, improving cooling while conserving salt.",
+  },
+  {
+    id: "int-4",
+    topicId: "integrated",
+    fact: "Ageing is associated with a progressive decline in maximal heart rate, VO2 max, GFR, and homeostatic reserve generally — the reduced ability to respond to physiological stress rather than resting values changing dramatically.",
+    question: "What best characterizes the physiological effect of normal ageing on organ systems?",
+    answer:
+      "A reduced homeostatic reserve — the capacity to respond to stress declines more than resting baseline function.",
+  },
+  {
+    id: "int-5",
+    topicId: "integrated",
+    fact: "In obesity and metabolic syndrome, expanded adipose tissue (especially visceral fat) secretes excess free fatty acids and inflammatory adipokines that promote insulin resistance in muscle and liver, raising the risk of type 2 diabetes.",
+    question: "How does visceral adiposity contribute to insulin resistance?",
+    answer:
+      "It releases excess free fatty acids and pro-inflammatory adipokines that impair insulin signaling in muscle and liver.",
+  },
+  {
+    id: "int-6",
+    topicId: "integrated",
+    fact: "Brain death is defined by the irreversible loss of all brainstem functions (including brainstem reflexes and the capacity to breathe spontaneously) despite a still-beating heart, and is a clinical diagnosis distinct from a persistent vegetative state.",
+    question: "What distinguishes brain death from a persistent vegetative state?",
+    answer:
+      "Brain death is irreversible loss of all brainstem function, including the drive to breathe; in a vegetative state, brainstem function (including spontaneous breathing) is preserved.",
+  },
+  {
+    id: "int-7",
+    topicId: "integrated",
+    fact: "In adult basic life support, high-quality chest compressions (rate 100-120/min, depth ~5-6 cm, allowing full chest recoil) generate forward blood flow mainly via direct cardiac compression and thoracic pump mechanisms, sustaining perfusion to the brain and heart until defibrillation/advanced care.",
+    question: "What is the recommended chest compression rate in adult BLS?",
+    answer: "100-120 compressions per minute, with a depth of about 5-6 cm and full chest recoil.",
+  },
+  {
+    id: "int-8",
+    topicId: "integrated",
+    fact: "Slow, controlled yogic breathing (pranayama) and meditation increase parasympathetic and reduce sympathetic tone, lowering heart rate and blood pressure — measurable via increased heart rate variability, and studied as adjuncts in hypertension and stress management.",
+    question: "What autonomic shift is associated with slow yogic breathing and meditation?",
+    answer:
+      "A shift toward parasympathetic dominance and reduced sympathetic tone, reflected in increased heart rate variability.",
+  },
 ];
 
-// Approximate NEET PG exam-yield tiers per system. These are not an
-// official NBE/NMC-published breakdown (no such per-topic percentage is
-// publicly released) — they reflect commonly observed patterns across
-// recent NEET PG papers and coaching-institute past-paper analyses, used
-// here to help prioritize revision time, not as a guaranteed forecast.
+// Revision-priority tiers per module — a study-navigation aid, NOT an
+// official NBEMS/NMC blueprint or published weightage. We deliberately
+// avoid showing percentages or claimed question counts here.
 export const WEIGHTAGE_META: Record<
   Weightage,
   { label: string; description: string; color: { bg: string; fg: string; ring: string } }
 > = {
   "very-high": {
-    label: "Very high yield",
-    description: "Among the most consistently tested physiology systems on NEET PG.",
+    label: "VERY HIGH",
+    description: "High-Yield Priority — among the modules most worth prioritizing in revision.",
     color: { bg: "oklch(0.91 0.1 15)", fg: "oklch(0.4 0.16 15)", ring: "oklch(0.58 0.19 15)" },
   },
   high: {
-    label: "High yield",
-    description: "Comes up reliably most years, often integrated with medicine questions.",
+    label: "HIGH",
+    description: "High-Yield Priority — comes up reliably, often integrated with medicine.",
     color: { bg: "oklch(0.92 0.12 45)", fg: "oklch(0.4 0.13 45)", ring: "oklch(0.62 0.17 45)" },
   },
   moderate: {
-    label: "Moderate yield",
-    description: "A steady but smaller share of questions most years.",
+    label: "MODERATE",
+    description: "High-Yield Priority — a steadier, smaller share of revision time.",
     color: { bg: "oklch(0.92 0.08 195)", fg: "oklch(0.34 0.09 210)", ring: "oklch(0.55 0.11 200)" },
   },
   foundational: {
-    label: "Foundational",
-    description: "Fewer standalone questions, but groundwork other systems build on.",
+    label: "FOUNDATION",
+    description: "High-Yield Priority — groundwork other modules build on.",
     color: { bg: "oklch(0.95 0.015 105)", fg: "oklch(0.42 0.03 260)", ring: "oklch(0.6 0.02 260)" },
   },
+};
+
+export const PRIORITY_META: Record<
+  NonNullable<FactItem["priority"]>,
+  { label: string; emoji: string }
+> = {
+  "must-know": { label: "MUST KNOW", emoji: "🔴" },
+  important: { label: "IMPORTANT", emoji: "🟠" },
+  supporting: { label: "SUPPORTING", emoji: "⚪" },
 };

@@ -448,4 +448,35 @@ export const MCQS: McqItem[] = [
     explanation:
       "Enterokinase, on the duodenal brush border, activates trypsinogen to trypsin, which then activates the other pancreatic zymogens.",
   },
+  {
+    id: "mcq-31",
+    topicId: "integrated",
+    question: "In fever, pyrogens such as IL-1 and IL-6 primarily act by:",
+    options: [
+      { id: "a", text: "Directly damaging the hypothalamus" },
+      { id: "b", text: "Raising the hypothalamic thermoregulatory set point" },
+      { id: "c", text: "Blocking sweat gland function" },
+      { id: "d", text: "Lowering the thermoregulatory set point" },
+    ],
+    correctOptionId: "b",
+    explanation:
+      "Pyrogens raise the hypothalamic set point itself, so the body generates and conserves heat (shivering, vasoconstriction) to reach the new, higher target.",
+  },
+  {
+    id: "mcq-32",
+    topicId: "integrated",
+    question: "What best distinguishes brain death from a persistent vegetative state?",
+    options: [
+      { id: "a", text: "Brain death preserves spontaneous breathing" },
+      { id: "b", text: "Vegetative state involves loss of all brainstem reflexes" },
+      {
+        id: "c",
+        text: "Brain death is irreversible loss of all brainstem function, including the drive to breathe",
+      },
+      { id: "d", text: "There is no clinical distinction between the two" },
+    ],
+    correctOptionId: "c",
+    explanation:
+      "Brain death requires irreversible loss of all brainstem function including the capacity to breathe spontaneously; a vegetative state preserves brainstem function such as breathing.",
+  },
 ];

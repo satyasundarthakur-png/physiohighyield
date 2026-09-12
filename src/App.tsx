@@ -10,7 +10,14 @@ import {
   Waypoints,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FACTS, TOPICS, WEIGHTAGE_META, type FactItem, type Weightage } from "@/data/facts";
+import {
+  FACTS,
+  TOPICS,
+  WEIGHTAGE_META,
+  PRIORITY_META,
+  type FactItem,
+  type Weightage,
+} from "@/data/facts";
 import { MCQS, type McqItem } from "@/data/mcqs";
 import { NORMAL_VALUES } from "@/data/normal-values";
 import { TOPIC_PALETTE } from "@/lib/palette";
@@ -276,6 +283,8 @@ const DIAGRAMS: {
   description: string;
   pearl: string;
   Component: () => ReactNode;
+  /** Flagged only on the small set of diagrams explicitly called out as exam-favorites. */
+  highYield?: boolean;
 }[] = [
   {
     topicId: "nerve-muscle",
@@ -284,6 +293,7 @@ const DIAGRAMS: {
     pearl:
       "Local anesthetics (e.g. lidocaine) work by blocking voltage-gated Na+ channels, preventing the depolarization phase from ever reaching threshold.",
     Component: ActionPotentialDiagram,
+    highYield: true,
   },
   {
     topicId: "nerve-muscle",
@@ -308,6 +318,7 @@ const DIAGRAMS: {
     pearl:
       "A third heart sound (S3) in a young healthy adult can be normal, but in an older adult it often signals volume overload — such as heart failure.",
     Component: CardiacCycleDiagram,
+    highYield: true,
   },
   {
     topicId: "cvs",
@@ -316,6 +327,7 @@ const DIAGRAMS: {
     pearl:
       "If the SA node fails, the AV node can take over as a backup pacemaker, but at a slower intrinsic rate — the basis of a junctional escape rhythm.",
     Component: CardiacConductionDiagram,
+    highYield: true,
   },
   {
     topicId: "cvs",
@@ -333,6 +345,7 @@ const DIAGRAMS: {
     pearl:
       "In heart failure, the Frank-Starling curve flattens and shifts down-right — the same increase in preload produces a smaller rise in stroke volume than normal.",
     Component: FrankStarlingDiagram,
+    highYield: true,
   },
   {
     topicId: "respiratory",
@@ -341,6 +354,7 @@ const DIAGRAMS: {
     pearl:
       "Fetal hemoglobin (HbF) has a left-shifted curve compared to adult HbA, giving it higher O2 affinity — helping the fetus extract oxygen from maternal blood across the placenta.",
     Component: OxyHemoglobinCurveDiagram,
+    highYield: true,
   },
   {
     topicId: "renal",
@@ -349,6 +363,7 @@ const DIAGRAMS: {
     pearl:
       "Loop diuretics (e.g. furosemide) block the Na-K-2Cl transporter in the thick ascending limb, disrupting the countercurrent multiplier and impairing the kidney's ability to concentrate urine.",
     Component: NephronSegmentsDiagram,
+    highYield: true,
   },
   {
     topicId: "endocrine",
@@ -358,6 +373,7 @@ const DIAGRAMS: {
     pearl:
       "Long-term exogenous steroid use suppresses the HPA axis via negative feedback — abruptly stopping steroids can cause adrenal insufficiency because the axis needs time to 'wake back up.'",
     Component: HpaAxisDiagram,
+    highYield: true,
   },
   {
     topicId: "reproductive",
@@ -375,6 +391,7 @@ const DIAGRAMS: {
     pearl:
       "ACE inhibitors (e.g. enalapril) blunt Angiotensin II formation, reducing both vasoconstriction and aldosterone-driven Na+/water retention — the basis of their antihypertensive effect.",
     Component: RaasDiagram,
+    highYield: true,
   },
   {
     topicId: "blood",
@@ -430,6 +447,7 @@ function DiagramCard({
   color,
   onExpand,
   children,
+  highYield,
 }: {
   title: string;
   description: string;
@@ -437,13 +455,21 @@ function DiagramCard({
   color: { bg: string; fg: string; ring: string };
   onExpand: () => void;
   children: ReactNode;
+  highYield?: boolean;
 }) {
   return (
     <div
       style={glowStyle(color.ring)}
       className="rounded-xl border border-border border-t-4 bg-card p-4 shadow-sm sm:p-6"
     >
-      <h3 className="font-display text-xl text-card-foreground">{title}</h3>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-display text-xl text-card-foreground">{title}</h3>
+        {highYield && (
+          <span className="shrink-0 rounded-full bg-rose-100 px-2 py-1 text-[10px] font-bold text-rose-800">
+            High-Yield
+          </span>
+        )}
+      </div>
       <p className="mt-1 mb-4 text-sm text-muted-foreground">{description}</p>
       <button
         type="button"
@@ -621,28 +647,58 @@ function Diagrams() {
 
 function FactSheets() {
   const [topicId, setTopicId] = useState<string | null>(null);
+  const [studyMode, setStudyMode] = useState<"mbbs" | "neetpg">("mbbs");
   if (!topicId) {
-    const units = Array.from(new Set(TOPICS.map((t) => t.unit)));
+    const weightOrder: Weightage[] = ["very-high", "high", "moderate", "foundational"];
+    const groups =
+      studyMode === "mbbs"
+        ? Array.from(new Set(TOPICS.map((t) => t.unit))).map((unit) => ({
+            key: unit,
+            heading: unit,
+            topics: TOPICS.filter((t) => t.unit === unit),
+          }))
+        : weightOrder.map((w) => ({
+            key: w,
+            heading: WEIGHTAGE_META[w].label,
+            topics: TOPICS.filter((t) => t.weightage === w),
+          }));
     return (
       <section>
         <SectionIntro
           eyebrow={`${FACTS.length} high-yield facts`}
           title="Choose a system"
-          description="Organized by unit — the sequence most Indian MBBS physiology courses teach from, with each system tagged by how often it tends to appear on NEET PG."
+          description="Browse by NMC-CBME module (curriculum order), or switch to NEET-PG High-Yield to see modules sorted by revision priority."
         />
-        <p className="-mt-4 mb-6 text-xs leading-relaxed text-muted-foreground">
-          Yield tags reflect commonly observed NEET PG question patterns, not an official NBE
-          breakdown — the exam doesn't publish one. Use them to prioritize revision time, not as a
-          guarantee.
+        <p className="-mt-4 mb-4 text-xs leading-relaxed text-muted-foreground">
+          Priority tags reflect a revision-priority hierarchy, not an official NBEMS blueprint or
+          published weightage — use them to plan study time, not as a guarantee.
         </p>
+        <div className="mb-6 inline-flex rounded-xl bg-muted p-1">
+          <button
+            type="button"
+            onClick={() => setStudyMode("mbbs")}
+            aria-pressed={studyMode === "mbbs"}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${studyMode === "mbbs" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+          >
+            MBBS / NMC
+          </button>
+          <button
+            type="button"
+            onClick={() => setStudyMode("neetpg")}
+            aria-pressed={studyMode === "neetpg"}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${studyMode === "neetpg" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+          >
+            NEET-PG High-Yield
+          </button>
+        </div>
         <div className="space-y-8">
-          {units.map((unit) => (
-            <div key={unit}>
+          {groups.map((group) => (
+            <div key={group.key}>
               <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                {unit}
+                {group.heading}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2">
-                {TOPICS.filter((t) => t.unit === unit).map((topic) => {
+                {group.topics.map((topic) => {
                   const count = FACTS.filter((f) => f.topicId === topic.id).length;
                   const color = topicColor(topic.id);
                   return (
@@ -666,8 +722,13 @@ function FactSheets() {
                       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                         {topic.blurb}
                       </p>
-                      <div className="mt-3">
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
                         <WeightageBadge weightage={topic.weightage} />
+                        {studyMode === "mbbs" && (
+                          <span className="rounded-full bg-muted px-2 py-1 font-mono text-[10px] font-bold text-muted-foreground">
+                            NMC-CBME: {topic.nmcModule}
+                          </span>
+                        )}
                       </div>
                     </button>
                   );
@@ -697,6 +758,9 @@ function FactSheets() {
       />
       <div className="-mt-4 mb-4 flex flex-wrap items-center gap-2">
         <WeightageBadge weightage={topic.weightage} />
+        <span className="rounded-full bg-muted px-2 py-1 font-mono text-[10px] font-bold text-muted-foreground">
+          NMC-CBME: {topic.nmcModule}
+        </span>
         <p className="text-xs leading-relaxed text-muted-foreground">{topic.examNote}</p>
       </div>
       {TOPIC_PEARLS[topicId] && <ClinicalPearl text={TOPIC_PEARLS[topicId] ?? ""} color={color} />}
@@ -712,7 +776,14 @@ function FactSheets() {
             >
               {index + 1}
             </span>
-            <p className="text-sm leading-7 text-card-foreground">{fact.fact}</p>
+            <div>
+              {fact.priority && (
+                <span className="mb-1 inline-block text-[10px] font-bold text-muted-foreground">
+                  {PRIORITY_META[fact.priority].emoji} {PRIORITY_META[fact.priority].label}
+                </span>
+              )}
+              <p className="text-sm leading-7 text-card-foreground">{fact.fact}</p>
+            </div>
           </li>
         ))}
       </ol>
@@ -865,17 +936,31 @@ function FlashcardMode() {
 
 function McqPractice() {
   const [topicFilter, setTopicFilter] = useState<string | "all">("all");
+  const [priorityFilter, setPriorityFilter] = useState<"all" | "high-yield">("all");
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState({ correct: 0, attempted: 0 });
-  const pool = useMemo(
-    () => MCQS.filter((q) => topicFilter === "all" || q.topicId === topicFilter),
-    [topicFilter],
-  );
+  const pool = useMemo(() => {
+    return MCQS.filter((q) => {
+      const matchesTopic = topicFilter === "all" || q.topicId === topicFilter;
+      const qTopic = TOPICS.find((t) => t.id === q.topicId);
+      const matchesPriority =
+        priorityFilter === "all" ||
+        qTopic?.weightage === "very-high" ||
+        qTopic?.weightage === "high";
+      return matchesTopic && matchesPriority;
+    });
+  }, [topicFilter, priorityFilter]);
   const current: McqItem | undefined = pool[index % Math.max(pool.length, 1)];
 
   function changeTopic(value: string) {
     setTopicFilter(value);
+    setIndex(0);
+    setSelected(null);
+    setScore({ correct: 0, attempted: 0 });
+  }
+  function changePriority(value: "all" | "high-yield") {
+    setPriorityFilter(value);
     setIndex(0);
     setSelected(null);
     setScore({ correct: 0, attempted: 0 });
@@ -901,29 +986,49 @@ function McqPractice() {
   return (
     <div>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="sr-only" htmlFor="mcq-topic-filter">
-          Filter MCQs by system
-        </label>
-        <select
-          id="mcq-topic-filter"
-          value={topicFilter}
-          onChange={(e) => changeTopic(e.target.value)}
-          className="min-h-10 rounded-xl border border-input bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          <option value="all">All systems ({MCQS.length})</option>
-          {Array.from(new Set(TOPICS.map((t) => t.unit))).map((unit) => (
-            <optgroup key={unit} label={unit}>
-              {TOPICS.filter((t) => t.unit === unit && MCQS.some((q) => q.topicId === t.id)).map(
-                (t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} ({MCQS.filter((q) => q.topicId === t.id).length}) ·{" "}
-                    {WEIGHTAGE_META[t.weightage].label}
-                  </option>
-                ),
-              )}
-            </optgroup>
-          ))}
-        </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="sr-only" htmlFor="mcq-topic-filter">
+            Filter MCQs by system
+          </label>
+          <select
+            id="mcq-topic-filter"
+            value={topicFilter}
+            onChange={(e) => changeTopic(e.target.value)}
+            className="min-h-10 rounded-xl border border-input bg-card px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="all">All systems ({MCQS.length})</option>
+            {Array.from(new Set(TOPICS.map((t) => t.unit))).map((unit) => (
+              <optgroup key={unit} label={unit}>
+                {TOPICS.filter((t) => t.unit === unit && MCQS.some((q) => q.topicId === t.id)).map(
+                  (t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({MCQS.filter((q) => q.topicId === t.id).length}) ·{" "}
+                      {WEIGHTAGE_META[t.weightage].label}
+                    </option>
+                  ),
+                )}
+              </optgroup>
+            ))}
+          </select>
+          <div className="inline-flex rounded-xl bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => changePriority("all")}
+              aria-pressed={priorityFilter === "all"}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${priorityFilter === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              MBBS (all)
+            </button>
+            <button
+              type="button"
+              onClick={() => changePriority("high-yield")}
+              aria-pressed={priorityFilter === "high-yield"}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${priorityFilter === "high-yield" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              NEET-PG High-Yield
+            </button>
+          </div>
+        </div>
         <span className="text-xs font-semibold text-muted-foreground">
           Score: {score.correct}/{score.attempted}
         </span>
@@ -933,12 +1038,15 @@ function McqPractice() {
         className="rounded-2xl border border-border border-t-4 bg-card p-6 shadow-sm sm:p-8"
       >
         <div className="flex items-center justify-between gap-3">
-          <span
-            style={{ backgroundColor: color.bg, color: color.fg }}
-            className="inline-block rounded-full px-3 py-1 text-xs font-bold"
-          >
-            {topic?.name}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              style={{ backgroundColor: color.bg, color: color.fg }}
+              className="inline-block rounded-full px-3 py-1 text-xs font-bold"
+            >
+              {topic?.name}
+            </span>
+            {topic && <WeightageBadge weightage={topic.weightage} />}
+          </div>
           <span className="text-xs font-medium text-muted-foreground">
             Q{(index % pool.length) + 1} of {pool.length}
           </span>
@@ -1025,13 +1133,17 @@ function Flashcards() {
 
 function NormalValues() {
   const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const categories = Array.from(new Set(NORMAL_VALUES.map((v) => v.topicId)));
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return NORMAL_VALUES;
-    return NORMAL_VALUES.filter(
-      (v) => v.parameter.toLowerCase().includes(q) || v.note.toLowerCase().includes(q),
-    );
-  }, [query]);
+    return NORMAL_VALUES.filter((v) => {
+      const matchesQuery =
+        !q || v.parameter.toLowerCase().includes(q) || v.note.toLowerCase().includes(q);
+      const matchesCategory = categoryFilter === "all" || v.topicId === categoryFilter;
+      return matchesQuery && matchesCategory;
+    });
+  }, [query, categoryFilter]);
   const [openValue, setOpenValue] = useState<(typeof NORMAL_VALUES)[number] | null>(null);
 
   return (
@@ -1039,7 +1151,7 @@ function NormalValues() {
       <SectionIntro
         eyebrow={`${NORMAL_VALUES.length} normal values`}
         title="Normal Values Reference"
-        description="Search by parameter name. Tap any card for the full clinical note."
+        description="Search by parameter name, or filter by system. Tap any card for the full clinical note."
       />
       <div className="relative mb-3">
         <Search
@@ -1058,6 +1170,31 @@ function NormalValues() {
           className="min-h-12 w-full rounded-xl border border-input bg-card pl-10 pr-4 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
         />
       </div>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setCategoryFilter("all")}
+          className={`rounded-full px-3 py-1 text-xs font-bold transition ${categoryFilter === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"}`}
+        >
+          All systems
+        </button>
+        {categories.map((topicId) => {
+          const topic = TOPICS.find((t) => t.id === topicId);
+          const active = categoryFilter === topicId;
+          const color = topicColor(topicId);
+          return (
+            <button
+              key={topicId}
+              type="button"
+              onClick={() => setCategoryFilter(topicId)}
+              style={active ? { backgroundColor: color.bg, color: color.fg } : undefined}
+              className={`rounded-full px-3 py-1 text-xs font-bold transition ${active ? "" : "bg-muted text-muted-foreground hover:bg-muted/70"}`}
+            >
+              {topic?.name ?? topicId}
+            </button>
+          );
+        })}
+      </div>
       <p aria-live="polite" className="mb-4 text-xs font-medium text-muted-foreground">
         Showing {results.length} of {NORMAL_VALUES.length} values
       </p>
@@ -1074,6 +1211,11 @@ function NormalValues() {
             >
               <div className="flex items-start justify-between gap-4">
                 <h3 className="text-sm font-bold text-card-foreground">{v.parameter}</h3>
+                {v.frequentlyTested && (
+                  <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                    Frequently tested
+                  </span>
+                )}
               </div>
               <p
                 style={{ backgroundColor: color.bg, color: color.fg }}
@@ -1123,7 +1265,7 @@ function NormalValues() {
 
 function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
   const stats = [
-    { label: "Systems", value: "11" },
+    { label: "NMC-CBME Modules", value: "12" },
     { label: "High-yield facts", value: `${FACTS.length}+` },
     { label: "Animated diagrams", value: `${DIAGRAMS.length}` },
     { label: "Normal values", value: `${NORMAL_VALUES.length}` },
@@ -1177,6 +1319,9 @@ function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
           <h1 className="gradient-text relative mt-5 font-display text-4xl leading-tight sm:text-5xl">
             Physiology High-Yield
           </h1>
+          <p className="relative mt-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            Aligned with NMC-CBME 2024 · MBBS + NEET-PG High-Yield
+          </p>
           <p className="relative mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
             Fact sheets, flashcards, animated system diagrams, MCQ practice, and a normal values
             reference — chaptered the way Indian MBBS students study, with clinical pearls
