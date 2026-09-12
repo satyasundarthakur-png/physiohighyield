@@ -7,7 +7,8 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:brightness-110",
+        default:
+          "bg-[linear-gradient(135deg,oklch(0.55_0.19_300),oklch(0.58_0.16_255))] bg-[length:160%_160%] text-primary-foreground shadow-sm transition-[filter,background-position] hover:bg-right hover:brightness-110",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:brightness-110",
         outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:brightness-95",
@@ -31,8 +32,7 @@ export const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   active?: boolean;
 }
 

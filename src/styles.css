@@ -13,11 +13,11 @@
   --color-popover-foreground: oklch(0.129 0.042 264.695);
   --color-primary: oklch(0.5 0.2 300);
   --color-primary-foreground: oklch(0.99 0.005 100);
-  --color-secondary: oklch(0.88 0.11 75);
+  --color-secondary: oklch(0.87 0.14 75);
   --color-secondary-foreground: oklch(0.32 0.09 55);
   --color-muted: oklch(0.95 0.015 105);
   --color-muted-foreground: oklch(0.5 0.04 290);
-  --color-accent: oklch(0.88 0.09 195);
+  --color-accent: oklch(0.87 0.12 195);
   --color-accent-foreground: oklch(0.3 0.1 220);
   --color-destructive: oklch(0.577 0.245 27.325);
   --color-destructive-foreground: oklch(0.984 0.003 247.858);
@@ -34,5 +34,42 @@
     font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+}
+
+@layer utilities {
+  /* A slowly panning rainbow strip — used for the top hairline bar. */
+  .animate-gradient-pan {
+    background-size: 200% 100%;
+    animation: gradient-pan 8s ease-in-out infinite;
+  }
+
+  /* Colorful gradient headline text, reserved for one hero moment per page. */
+  .gradient-text {
+    background: linear-gradient(
+      120deg,
+      oklch(0.5 0.2 300),
+      oklch(0.55 0.16 255) 45%,
+      oklch(0.65 0.16 195)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gradient-pan {
+    animation: none;
   }
 }

@@ -52,6 +52,26 @@ function topicColor(topicId: string) {
   );
 }
 
+// A colored top edge plus a soft, tinted ambient shadow in the same hue —
+// used on every card so each section reads as its own color, not a generic
+// grey-shadow card kit.
+function glowStyle(accent: string) {
+  return {
+    borderTopColor: accent,
+    boxShadow: `0 14px 30px -16px color-mix(in oklch, ${accent} 60%, transparent)`,
+  };
+}
+
+// Colors used for the four top-level study modes — shared by the header
+// nav pills and the landing page feature cards so the same mode always
+// carries the same color throughout the app.
+const TAB_COLORS: Record<Tab, { bg: string; fg: string; ring: string }> = {
+  sheets: TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+  flashcards: TOPIC_PALETTE[2] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+  diagrams: TOPIC_PALETTE[4] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+  values: TOPIC_PALETTE[6] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+};
+
 function SectionIntro({
   eyebrow,
   title,
@@ -75,19 +95,21 @@ function TabButton({
   onClick,
   icon,
   label,
+  color,
 }: {
   active: boolean;
   onClick: () => void;
   icon: ReactNode;
   label: string;
+  color: { bg: string; fg: string };
 }) {
   return (
     <Button
       variant="tab"
-      active={active}
       onClick={onClick}
       aria-pressed={active}
-      className={`min-w-0 rounded-lg px-2 transition sm:px-3 ${active ? "text-primary shadow-sm" : ""}`}
+      style={active ? { backgroundColor: color.bg, color: color.fg } : undefined}
+      className={`min-w-0 rounded-lg px-2 transition sm:px-3 ${active ? "shadow-sm" : ""}`}
     >
       {icon}
       <span className="hidden text-xs sm:inline sm:text-sm">{label}</span>
@@ -145,7 +167,7 @@ function FurtherReading({
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ borderTopColor: color.fg }}
+            style={glowStyle(color.fg)}
             className="group flex flex-col gap-1 rounded-lg border border-border border-t-4 bg-muted/40 p-3 text-sm transition hover:brightness-95"
           >
             <span className="flex items-center gap-1.5 font-bold text-card-foreground">
@@ -405,7 +427,7 @@ function DiagramCard({
 }) {
   return (
     <div
-      style={{ borderTopColor: color.ring }}
+      style={glowStyle(color.ring)}
       className="rounded-xl border border-border border-t-4 bg-card p-4 shadow-sm sm:p-6"
     >
       <h3 className="font-display text-xl text-card-foreground">{title}</h3>
@@ -457,7 +479,7 @@ function Modal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ borderTopColor: color.ring }}
+        style={glowStyle(color.ring)}
         className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl border-t-4 border-border bg-card p-6 text-center shadow-xl"
       >
         {children}
@@ -520,7 +542,7 @@ function Diagrams() {
                         key={icon.src}
                         type="button"
                         onClick={() => setOpenIcon(icon)}
-                        style={{ borderTopColor: color.ring }}
+                        style={glowStyle(color.ring)}
                         className="group rounded-xl border border-border border-t-4 bg-card p-3 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
                       >
                         <img
@@ -605,7 +627,7 @@ function FactSheets() {
                     <button
                       key={topic.id}
                       onClick={() => setTopicId(topic.id)}
-                      style={{ borderTopColor: color.ring }}
+                      style={glowStyle(color.ring)}
                       className="group min-h-36 rounded-xl border border-border border-t-4 bg-card p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -758,7 +780,7 @@ function FlashcardMode() {
         <>
           <button
             onClick={() => setFlipped((v) => !v)}
-            style={{ borderTopColor: topicColor(current.topicId).ring }}
+            style={glowStyle(topicColor(current.topicId).ring)}
             className="flex min-h-72 w-full items-center justify-center rounded-2xl border border-border border-t-4 bg-card p-7 text-center shadow-sm transition hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-80 sm:p-12"
             aria-label={flipped ? "Show question" : "Reveal answer"}
           >
@@ -876,7 +898,7 @@ function McqPractice() {
         </span>
       </div>
       <div
-        style={{ borderTopColor: color.ring }}
+        style={glowStyle(color.ring)}
         className="rounded-2xl border border-border border-t-4 bg-card p-6 shadow-sm sm:p-8"
       >
         <div className="flex items-center justify-between gap-3">
@@ -1016,7 +1038,7 @@ function NormalValues() {
               key={v.id}
               type="button"
               onClick={() => setOpenValue(v)}
-              style={{ borderTopColor: color.ring }}
+              style={glowStyle(color.ring)}
               className="group rounded-xl border border-border border-t-4 bg-card p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
             >
               <div className="flex items-start justify-between gap-4">
@@ -1087,37 +1109,33 @@ function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
       title: "Fact Sheets",
       description: "Concise, system-by-system facts with clinical pearls and further reading.",
       icon: <BookOpen size={22} />,
-      color: TOPIC_PALETTE[0] ??
-        TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+      color: TAB_COLORS.sheets,
     },
     {
       tab: "flashcards",
       title: "Flashcards + MCQs",
       description: "Spaced-repetition review and NEET PG-style MCQ practice.",
       icon: <Layers3 size={22} />,
-      color: TOPIC_PALETTE[2] ??
-        TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+      color: TAB_COLORS.flashcards,
     },
     {
       tab: "diagrams",
       title: "Diagrams",
       description: "Animated physiology diagrams you can tap to enlarge, grouped by system.",
       icon: <Waypoints size={22} />,
-      color: TOPIC_PALETTE[4] ??
-        TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+      color: TAB_COLORS.diagrams,
     },
     {
       tab: "values",
       title: "Normal Values",
       description: "Searchable reference for every normal range examiners test.",
       icon: <FlaskConical size={22} />,
-      color: TOPIC_PALETTE[6] ??
-        TOPIC_PALETTE[0] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+      color: TAB_COLORS.values,
     },
   ];
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <div className="h-1.5 w-full bg-[linear-gradient(90deg,oklch(0.55_0.19_300),oklch(0.6_0.14_195),oklch(0.75_0.16_80),oklch(0.62_0.21_15),oklch(0.6_0.16_155))]" />
+      <div className="h-1.5 w-full animate-gradient-pan bg-[linear-gradient(90deg,oklch(0.55_0.19_300),oklch(0.6_0.14_195),oklch(0.75_0.16_80),oklch(0.62_0.21_15),oklch(0.6_0.16_155),oklch(0.55_0.19_300))]" />
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-10 sm:px-6 sm:py-16">
         <div className="relative overflow-hidden rounded-3xl bg-[linear-gradient(135deg,oklch(0.94_0.08_300),oklch(0.93_0.07_195)_45%,oklch(0.94_0.1_75))] p-6 text-center shadow-sm sm:p-12">
           <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-white/30 blur-2xl" />
@@ -1125,7 +1143,7 @@ function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
           <div className="relative mx-auto flex size-16 items-center justify-center rounded-2xl text-primary-foreground shadow-md bg-[linear-gradient(135deg,oklch(0.55_0.19_300),oklch(0.58_0.16_255))] sm:size-20">
             <Waypoints aria-hidden="true" size={34} />
           </div>
-          <h1 className="relative mt-5 font-display text-4xl leading-tight text-foreground sm:text-5xl">
+          <h1 className="gradient-text relative mt-5 font-display text-4xl leading-tight sm:text-5xl">
             Physiology High-Yield
           </h1>
           <p className="relative mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -1159,7 +1177,7 @@ function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
               key={f.tab}
               type="button"
               onClick={() => onEnter(f.tab)}
-              style={{ borderTopColor: f.color.ring }}
+              style={glowStyle(f.color.ring)}
               className="group rounded-xl border border-border border-t-4 bg-card p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <div
@@ -1201,7 +1219,7 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <div className="h-1.5 w-full bg-[linear-gradient(90deg,oklch(0.55_0.19_300),oklch(0.6_0.14_195),oklch(0.75_0.16_80),oklch(0.62_0.21_15),oklch(0.6_0.16_155))]" />
+      <div className="h-1.5 w-full animate-gradient-pan bg-[linear-gradient(90deg,oklch(0.55_0.19_300),oklch(0.6_0.14_195),oklch(0.75_0.16_80),oklch(0.62_0.21_15),oklch(0.6_0.16_155),oklch(0.55_0.19_300))]" />
       <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-3">
@@ -1228,24 +1246,28 @@ export default function App() {
               onClick={() => setTab("sheets")}
               icon={<BookOpen size={16} />}
               label="Fact Sheets"
+              color={TAB_COLORS.sheets}
             />
             <TabButton
               active={tab === "flashcards"}
               onClick={() => setTab("flashcards")}
               icon={<Layers3 size={16} />}
               label="Flashcards"
+              color={TAB_COLORS.flashcards}
             />
             <TabButton
               active={tab === "diagrams"}
               onClick={() => setTab("diagrams")}
               icon={<Waypoints size={16} />}
               label="Diagrams"
+              color={TAB_COLORS.diagrams}
             />
             <TabButton
               active={tab === "values"}
               onClick={() => setTab("values")}
               icon={<FlaskConical size={16} />}
               label="Normal Values"
+              color={TAB_COLORS.values}
             />
           </nav>
         </div>
