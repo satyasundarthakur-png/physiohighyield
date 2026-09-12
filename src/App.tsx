@@ -7,6 +7,7 @@ import {
   FlaskConical,
   Layers3,
   Search,
+  Stethoscope,
   Waypoints,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ import {
   GastricPhasesDiagram,
 } from "@/components/pathway-diagrams";
 
-type Tab = "sheets" | "flashcards" | "diagrams" | "values";
+type Tab = "sheets" | "flashcards" | "diagrams" | "values" | "practical";
 
 function topicColor(topicId: string) {
   const index = TOPICS.findIndex((t) => t.id === topicId);
@@ -77,6 +78,7 @@ const TAB_COLORS: Record<Tab, { bg: string; fg: string; ring: string }> = {
   flashcards: TOPIC_PALETTE[2] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
   diagrams: TOPIC_PALETTE[4] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
   values: TOPIC_PALETTE[6] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+  practical: TOPIC_PALETTE[9] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
 };
 
 function SectionIntro({
@@ -1268,6 +1270,288 @@ function NormalValues() {
   );
 }
 
+const PRACTICAL_STATIONS: {
+  title: string;
+  color: { bg: string; fg: string; ring: string };
+  steps: { title: string; description: string }[];
+}[] = [
+  {
+    title: "Hematology Practical",
+    color: TOPIC_PALETTE[1] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+    steps: [
+      {
+        title: "Hemoglobin estimation (Sahli's method)",
+        description:
+          "Draw blood to the 20 mm³ mark, mix with N/10 HCl in the Sahli tube, wait 10 minutes for acid hematin to form, then dilute with distilled water drop by drop until the color matches the comparator block. Read the Hb value directly off the tube scale.",
+      },
+      {
+        title: "Total leukocyte count (TLC)",
+        description:
+          "Draw blood to the 0.5 mark in a WBC pipette, dilute with WBC fluid (dilute acetic acid + gentian violet) to the 11 mark to lyse RBCs and stain nuclei, charge a Neubauer counting chamber, and count cells in the 4 corner WBC squares under low power.",
+      },
+      {
+        title: "Differential leukocyte count (DLC)",
+        description:
+          "Prepare a thin monolayer blood smear, air-dry, fix and stain with Leishman stain, then examine under oil immersion using the battlement method to count and classify 100 consecutive leukocytes by type.",
+      },
+      {
+        title: "Blood grouping (ABO and Rh)",
+        description:
+          "Place separate drops of blood on a slide with anti-A, anti-B, and anti-D antisera; mix each with a clean applicator and look for agglutination within 1-2 minutes to determine ABO group and Rh status.",
+      },
+      {
+        title: "Bleeding time and clotting time",
+        description:
+          "Bleeding time (Duke's method): a standardized ear-lobe/fingertip prick, blotting every 30 seconds until bleeding stops. Clotting time (capillary tube method): fill a capillary tube from a finger prick and break it every 30 seconds until a fibrin thread appears.",
+      },
+      {
+        title: "Erythrocyte sedimentation rate (ESR)",
+        description:
+          "Fill a Westergren tube with citrated blood to the 0 mark, stand it vertically, undisturbed, for exactly 1 hour, then read the height (mm) of clear plasma above the settled column of RBCs.",
+      },
+    ],
+  },
+  {
+    title: "Clinical Examination Skills",
+    color: TOPIC_PALETTE[3] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+    steps: [
+      {
+        title: "Recording the pulse",
+        description:
+          "Palpate the radial artery with the pads of two or three fingers and note the rate, rhythm, volume, character, and condition of the vessel wall, comparing both radial pulses for radio-radial delay.",
+      },
+      {
+        title: "Blood pressure measurement",
+        description:
+          "Wrap the cuff snugly around the upper arm, inflate above the expected systolic pressure, then deflate slowly while auscultating over the brachial artery — the first Korotkoff sound marks systolic pressure, and the disappearance of sound marks diastolic pressure.",
+      },
+      {
+        title: "Respiratory rate and pattern",
+        description:
+          "Observe chest/abdominal movements without the subject's awareness (to avoid voluntary alteration) and count breaths over a full minute, noting rate, rhythm, and depth.",
+      },
+      {
+        title: "Deep tendon reflexes",
+        description:
+          "Elicit the knee jerk by striking the patellar tendon with a reflex hammer while the leg hangs relaxed, and the ankle jerk by tapping the Achilles tendon with the foot in slight dorsiflexion — grade the briskness of contraction on both sides.",
+      },
+      {
+        title: "Spirometry",
+        description:
+          "Have the subject take a maximal inspiration, then exhale forcefully and completely into the spirometer mouthpiece to record vital capacity and its subdivisions (tidal volume, inspiratory and expiratory reserve volume).",
+      },
+    ],
+  },
+  {
+    title: "Physiology Spotters & Instruments",
+    color: TOPIC_PALETTE[5] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+    steps: [
+      {
+        title: "Sphygmomanometer",
+        description:
+          "Identifies by its inflatable cuff, manometer (mercury column or aneroid dial), and bulb — used with a stethoscope for auscultatory blood pressure measurement.",
+      },
+      {
+        title: "Stethoscope",
+        description:
+          "A diaphragm and bell chest-piece connected via tubing to binaural earpieces — the diaphragm picks up high-frequency sounds (e.g. S1/S2), the bell picks up low-frequency sounds (e.g. S3/S4, bruits).",
+      },
+      {
+        title: "Sahli's hemoglobinometer",
+        description:
+          "A graduated glass tube with a comparator block and a Hb pipette in a fitted box — used for the acid-hematin method of hemoglobin estimation described in the hematology station above.",
+      },
+      {
+        title: "Neubauer counting chamber (haemocytometer)",
+        description:
+          "A thick glass slide with a precision-etched grid under a coverslip, used with WBC/RBC diluting pipettes to count blood cells per unit volume under the microscope.",
+      },
+      {
+        title: "Reflex hammer",
+        description:
+          "A rubber-headed hammer used to elicit deep tendon reflexes (knee jerk, ankle jerk, biceps/triceps jerk) by striking the relevant tendon briskly.",
+      },
+      {
+        title: "Spirometer",
+        description:
+          "A device (water-seal or dry bellows/digital) that records the volume of air moved during breathing — used to measure vital capacity and its subdivisions.",
+      },
+    ],
+  },
+  {
+    title: "Clinical Case / Applied Physiology Discussion",
+    color: TOPIC_PALETTE[7] ?? { bg: "transparent", fg: "currentColor", ring: "currentColor" },
+    steps: [
+      {
+        title: "Identify the abnormal parameter(s)",
+        description:
+          "Scan the given vitals, hemogram, or ABG systematically and note every value outside the reference range before jumping to an interpretation.",
+      },
+      {
+        title: "Correlate the physiological mechanism",
+        description:
+          "Link each abnormal value to the underlying physiological mechanism — e.g. a low PaO2 with a high PaCO2 pointing to hypoventilation rather than a diffusion or V/Q problem.",
+      },
+      {
+        title: "Bring in the clinical vignette",
+        description:
+          "Match the physiological pattern against the patient's presenting complaint, history, and any examination findings given in the case.",
+      },
+      {
+        title: "State the most likely explanation",
+        description:
+          "Commit to a single best-fit physiological explanation and name one bedside or lab finding the examiner would expect to confirm it.",
+      },
+      {
+        title: "Mention a differential",
+        description:
+          "Name one alternative physiological mechanism that could produce a similar picture, and the key feature that distinguishes it from your primary answer.",
+      },
+    ],
+  },
+];
+
+function PracticalStationCard({ station }: { station: (typeof PRACTICAL_STATIONS)[number] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      style={glowStyle(station.color.ring)}
+      className="rounded-xl border border-border border-t-4 bg-card p-4 shadow-sm sm:p-5"
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 text-left"
+      >
+        <h3 className="font-display text-xl text-card-foreground">{station.title}</h3>
+        <span
+          style={{ backgroundColor: station.color.bg, color: station.color.fg }}
+          className="shrink-0 rounded-full px-2 py-1 text-[11px] font-bold"
+        >
+          {station.steps.length} steps
+        </span>
+      </button>
+      {open && (
+        <ol className="mt-4 space-y-3">
+          {station.steps.map((step, i) => (
+            <li key={step.title} className="flex gap-3">
+              <span
+                style={{ backgroundColor: station.color.bg, color: station.color.fg }}
+                className="flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+              >
+                {i + 1}
+              </span>
+              <div>
+                <p className="text-sm font-bold text-card-foreground">{step.title}</p>
+                <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+                  {step.description}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function VivaBank() {
+  const [query, setQuery] = useState("");
+  const units = Array.from(new Set(TOPICS.map((t) => t.unit)));
+  const normalized = query.trim().toLowerCase();
+  return (
+    <div>
+      <div className="relative mb-4">
+        <Search
+          aria-hidden="true"
+          size={18}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+        />
+        <label className="sr-only" htmlFor="viva-search">
+          Search viva questions
+        </label>
+        <input
+          id="viva-search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search a viva question…"
+          className="min-h-12 w-full rounded-xl border border-input bg-card pl-10 pr-4 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
+        />
+      </div>
+      <div className="space-y-8">
+        {units.map((unit) => {
+          const unitTopicIds = new Set(TOPICS.filter((t) => t.unit === unit).map((t) => t.id));
+          const questions = FACTS.filter(
+            (f) =>
+              unitTopicIds.has(f.topicId) &&
+              (normalized === "" ||
+                f.question.toLowerCase().includes(normalized) ||
+                f.answer.toLowerCase().includes(normalized)),
+          );
+          if (questions.length === 0) return null;
+          return (
+            <div key={unit}>
+              <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                {unit}
+              </h3>
+              <div className="space-y-2">
+                {questions.map((f) => {
+                  const color = topicColor(f.topicId);
+                  return (
+                    <details
+                      key={f.id}
+                      className="group rounded-lg border border-border bg-card p-3 open:shadow-sm"
+                    >
+                      <summary className="flex cursor-pointer list-none items-start justify-between gap-3 text-sm font-bold text-card-foreground marker:content-none">
+                        <span>{f.question}</span>
+                        <span
+                          style={{ backgroundColor: color.bg, color: color.fg }}
+                          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold group-open:hidden"
+                        >
+                          Reveal
+                        </span>
+                      </summary>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {f.answer}
+                      </p>
+                    </details>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Practical() {
+  return (
+    <section>
+      <SectionIntro
+        eyebrow="Practical exam + viva voce"
+        title="Get ready for the bench and the table"
+        description="The recent Indian MBBS physiology practical format: hematology bench work, clinical examination skills, spotters/instruments, a case discussion — plus a searchable viva voce question bank pulled from every module."
+      />
+      <div className="space-y-4">
+        {PRACTICAL_STATIONS.map((station) => (
+          <PracticalStationCard key={station.title} station={station} />
+        ))}
+      </div>
+
+      <div className="mt-10 border-t border-border pt-6">
+        <h3 className="font-display text-2xl text-foreground">Viva Voce Question Bank</h3>
+        <p className="mt-1 mb-4 text-sm text-muted-foreground">
+          Tap any question to reveal the answer — the same high-yield Q&amp;A used in Flashcards,
+          organized for rapid-fire viva practice.
+        </p>
+        <VivaBank />
+      </div>
+    </section>
+  );
+}
+
 function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
   const stats = [
     { label: "NMC-CBME Modules", value: "12" },
@@ -1309,6 +1593,13 @@ function LandingPage({ onEnter }: { onEnter: (tab: Tab) => void }) {
       description: "Searchable reference for every normal range examiners test.",
       icon: <FlaskConical size={22} />,
       color: TAB_COLORS.values,
+    },
+    {
+      tab: "practical",
+      title: "Practical & Viva",
+      description: "Exam-station walkthroughs plus a searchable viva voce question bank.",
+      icon: <Stethoscope size={22} />,
+      color: TAB_COLORS.practical,
     },
   ];
   return (
@@ -1421,7 +1712,7 @@ export default function App() {
               </p>
             </div>
           </div>
-          <nav aria-label="Study modes" className="grid grid-cols-4 rounded-xl bg-muted p-1">
+          <nav aria-label="Study modes" className="grid grid-cols-5 rounded-xl bg-muted p-1">
             <TabButton
               active={tab === "sheets"}
               onClick={() => setTab("sheets")}
@@ -1450,6 +1741,13 @@ export default function App() {
               label="Normal Values"
               color={TAB_COLORS.values}
             />
+            <TabButton
+              active={tab === "practical"}
+              onClick={() => setTab("practical")}
+              icon={<Stethoscope size={16} />}
+              label="Practical"
+              color={TAB_COLORS.practical}
+            />
           </nav>
         </div>
       </header>
@@ -1458,6 +1756,7 @@ export default function App() {
         {tab === "flashcards" && <Flashcards />}
         {tab === "diagrams" && <Diagrams />}
         {tab === "values" && <NormalValues />}
+        {tab === "practical" && <Practical />}
       </main>
       <footer className="border-t border-border px-4 py-6 text-center text-xs leading-relaxed text-muted-foreground">
         High-yield facts are original summaries for exam revision. Always cross-check your course
